@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es-PE">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de Mercados — EcoRealTools</title>
+<meta name="description" content="Cotizaciones de bolsas, commodities, divisas y criptomonedas en tiempo real, más indicadores económicos clave de 10 países.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #0E1F2B;
+    --navy-2: #14303F;
+    --paper: #EEF1EC;
+    --paper-2: #E2E7DF;
+    --gold: #B98B2A;
+    --gold-2: #D9A94A;
+    --ink: #10201C;
+    --ink-soft: #4B5A55;
+    --line: rgba(14,31,43,0.14);
+    --white: #FBFCFA;
+    --radius: 4px;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background: var(--paper); color: var(--ink);
+    font-family: 'Inter', sans-serif; -webkit-font-smoothing:antialiased;
+  }
+  a{ color:inherit; }
+
+  header{
+    position:sticky; top:0; z-index:50; background: var(--navy);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .nav-wrap{
+    max-width:1200px; margin:0 auto; padding:18px 24px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .brand{
+    display:flex; align-items:baseline; gap:8px;
+    font-family:'Fraunces', serif; font-weight:600; font-size:1.25rem;
+    color: var(--white); text-decoration:none; letter-spacing:-0.01em;
+  }
+  .brand small{
+    font-family:'IBM Plex Mono', monospace; font-weight:500;
+    font-size:0.62rem; color: var(--gold-2); letter-spacing:0.14em;
+    text-transform:uppercase; border:1px solid rgba(217,169,74,0.4);
+    padding:2px 6px; border-radius:2px;
+  }
+  nav a{
+    color: rgba(251,252,250,0.72); text-decoration:none;
+    font-size:0.92rem; font-weight:500; margin-left:28px;
+  }
+  nav a:hover{ color: var(--gold-2); }
+
+  .page-head{ max-width:1200px; margin:0 auto; padding:48px 24px 24px; }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace; font-size:0.72rem;
+    letter-spacing:0.16em; text-transform:uppercase; color: var(--gold);
+    margin:0 0 12px;
+  }
+  h1{
+    font-family:'Fraunces', serif; font-weight:600; font-size:clamp(1.9rem, 3.4vw, 2.6rem);
+    line-height:1.1; margin:0 0 12px; letter-spacing:-0.01em; color: var(--navy);
+  }
+  .page-head p{ color:var(--ink-soft); font-size:1rem; line-height:1.55; max-width:60ch; margin:0; }
+
+  .panels-wrap{ max-width:1200px; margin:0 auto; padding:0 24px 80px; display:flex; flex-direction:column; gap:28px; }
+
+  .panel-card{
+    background: var(--white); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
+  }
+  .panel-head{
+    padding:20px 24px; border-bottom:1px solid var(--line);
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;
+  }
+  .panel-head h2{
+    font-family:'Fraunces', serif; font-size:1.15rem; color:var(--navy); margin:0;
+  }
+  .panel-head .tag{
+    font-family:'IBM Plex Mono', monospace; font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase;
+    color: var(--gold); background: rgba(185,139,42,0.1); padding:3px 8px; border-radius:2px;
+  }
+  .panel-body{ padding:0; }
+  .panel-body.pad{ padding:24px; }
+
+  .placeholder{
+    padding:60px 24px; text-align:center; color:var(--ink-soft); font-size:0.9rem;
+    background: repeating-linear-gradient(45deg, rgba(14,31,43,0.02), rgba(14,31,43,0.02) 10px, transparent 10px, transparent 20px);
+  }
+
+  .data-table{ width:100%; border-collapse:collapse; font-size:0.9rem; }
+  .data-table th{
+    text-align:left; font-family:'IBM Plex Mono', monospace; font-size:0.7rem;
+    letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-soft);
+    padding:10px 12px; border-bottom:2px solid var(--line);
+  }
+  .data-table td{
+    padding:12px; border-bottom:1px solid var(--line); color:var(--ink);
+  }
+  .data-table tbody tr:hover{ background: var(--paper); }
+  .data-table td:nth-child(2), .data-table td:nth-child(3){
+    font-family:'IBM Plex Mono', monospace; font-size:0.85rem;
+  }
+  .needs-update{ color:var(--gold); font-style:italic; font-size:0.82rem !important; }
+  .table-note{
+    font-size:0.78rem; color:var(--ink-soft); margin:16px 0 0; line-height:1.5;
+    border-top:1px solid var(--line); padding-top:14px;
+  }
+
+  footer{
+    border-top:1px solid var(--line); padding:28px 24px; text-align:center;
+    font-size:0.82rem; color:var(--ink-soft);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-wrap">
+    <a href="index.html" class="brand">EcoReal <small>Tools</small></a>
+    <nav>
+      <a href="index.html">Calculadora</a>
+      <a href="panel-mercados.html">Panel de mercados</a>
+    </nav>
+  </div>
+</header>
+
+<section class="page-head">
+  <p class="eyebrow">Panel de mercados</p>
+  <h1>Datos financieros y económicos, en un solo lugar.</h1>
+  <p>Cotizaciones de bolsas, materias primas, divisas y criptomonedas en tiempo real — más indicadores económicos clave de 10 países. Todo actualizado directamente desde la fuente, sin registrarte.</p>
+</section>
+
+<section class="panels-wrap">
+
+  <div class="panel-card">
+    <div class="panel-head">
+      <h2>Bolsas e índices</h2>
+      <span class="tag">Tiempo real</span>
+    </div>
+    <div class="panel-body">
+      <!-- TradingView Widget BEGIN -->
+      <div class="tradingview-widget-container">
+        <div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
+        {
+          "colorTheme": "light",
+          "dateRange": "1D",
+          "showChart": false,
+          "locale": "es",
+          "largeChartUrl": "",
+          "isTransparent": false,
+          "showSymbolLogo": true,
+          "showFloatingTooltip": false,
+          "width": "100%",
+          "height": "480",
+          "plotLineColorGrowing": "rgba(41, 98, 255, 1)",
+          "plotLineColorFalling": "rgba(41, 98, 255, 1)",
+          "gridLineColor": "rgba(240, 243, 250, 0)",
+          "scaleFontColor": "rgba(19, 23, 34, 1)",
+          "belowLineFillColorGrowing": "rgba(41, 98, 255, 0.12)",
+          "belowLineFillColorFalling": "rgba(41, 98, 255, 0.12)",
+          "belowLineFillColorGrowingBottom": "rgba(41, 98, 255, 0)",
+          "belowLineFillColorFallingBottom": "rgba(41, 98, 255, 0)",
+          "symbolActiveColor": "rgba(41, 98, 255, 0.12)",
+          "tabs": [
+            {
+              "title": "Índices principales",
+              "symbols": [
+                { "s": "SP:SPX", "d": "S&P 500 (EE. UU.)" },
+                { "s": "NASDAQ:IXIC", "d": "Nasdaq Composite (EE. UU.)" },
+                { "s": "NASDAQ:NDX", "d": "Nasdaq-100 (EE. UU.)" },
+                { "s": "SSE:000001", "d": "Shanghai Composite (China)" },
+                { "s": "XETR:DAX", "d": "DAX (Alemania)" },
+                { "s": "BMFBOVESPA:IBOV", "d": "Ibovespa (Brasil)" },
+                { "s": "BVL:MXNUAMPEGEN", "d": "MSCI NUAM Perú General" },
+                { "s": "BCS:SPIPSA", "d": "S&P IPSA (Chile)" },
+                { "s": "BVC:ICAP", "d": "MSCI COLCAP (Colombia)" },
+                { "s": "INDEX:ME", "d": "IPC México" },
+                { "s": "TVC:IBEX35", "d": "IBEX 35 (España)" },
+                { "s": "FTSE:UKX", "d": "FTSE 100 (Reino Unido)" }
+              ]
+            }
+          ]
+        }
+        </script>
+      </div>
+      <!-- TradingView Widget END -->
+    </div>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-head">
+      <h2>Materias primas (commodities)</h2>
+      <span class="tag">Tiempo real</span>
+    </div>
+    <div class="panel-body">
+      <!-- TradingView Widget BEGIN -->
+      <div class="tradingview-widget-container">
+        <div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
+        {
+          "colorTheme": "light",
+          "dateRange": "1D",
+          "showChart": false,
+          "locale": "es",
+          "isTransparent": false,
+          "showSymbolLogo": true,
+          "showFloatingTooltip": false,
+          "width": "100%",
+          "height": "320",
+          "gridLineColor": "rgba(240, 243, 250, 0)",
+          "scaleFontColor": "rgba(19, 23, 34, 1)",
+          "tabs": [
+            {
+              "title": "Materias primas",
+              "symbols": [
+                { "s": "TVC:GOLD", "d": "Oro" },
+                { "s": "TVC:SILVER", "d": "Plata" },
+                { "s": "TVC:USOIL", "d": "Petróleo WTI" },
+                { "s": "TVC:UKOIL", "d": "Petróleo Brent" },
+                { "s": "COMEX:HG", "d": "Cobre" },
+                { "s": "NYMEX:NG", "d": "Gas natural" }
+              ]
+            }
+          ]
+        }
+        </script>
+      </div>
+      <!-- TradingView Widget END -->
+    </div>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-head">
+      <h2>Tipo de cambio</h2>
+      <span class="tag">Tiempo real</span>
+    </div>
+    <div class="panel-body">
+      <!-- TradingView Widget BEGIN -->
+      <div class="tradingview-widget-container">
+        <div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
+        {
+          "colorTheme": "light",
+          "dateRange": "1D",
+          "showChart": false,
+          "locale": "es",
+          "isTransparent": false,
+          "showSymbolLogo": true,
+          "showFloatingTooltip": false,
+          "width": "100%",
+          "height": "400",
+          "gridLineColor": "rgba(240, 243, 250, 0)",
+          "scaleFontColor": "rgba(19, 23, 34, 1)",
+          "tabs": [
+            {
+              "title": "Divisas",
+              "symbols": [
+                { "s": "ICE:USDPEN", "d": "USD / PEN (Perú)" },
+                { "s": "FX_IDC:USDCNY", "d": "USD / CNY (China)" },
+                { "s": "FX:EURUSD", "d": "EUR / USD (Alemania y España)" },
+                { "s": "FX_IDC:USDBRL", "d": "USD / BRL (Brasil)" },
+                { "s": "ICE:USDCLP", "d": "USD / CLP (Chile)" },
+                { "s": "ICE:USDCOP", "d": "USD / COP (Colombia)" },
+                { "s": "FX_IDC:USDMXN", "d": "USD / MXN (México)" },
+                { "s": "FX:GBPUSD", "d": "GBP / USD (Reino Unido)" }
+              ]
+            }
+          ]
+        }
+        </script>
+      </div>
+      <!-- TradingView Widget END -->
+    </div>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-head">
+      <h2>Criptomonedas</h2>
+      <span class="tag">Tiempo real</span>
+    </div>
+    <div class="panel-body">
+      <!-- TradingView Widget BEGIN -->
+      <div class="tradingview-widget-container">
+        <div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
+        {
+          "colorTheme": "light",
+          "dateRange": "1D",
+          "showChart": false,
+          "locale": "es",
+          "isTransparent": false,
+          "showSymbolLogo": true,
+          "showFloatingTooltip": false,
+          "width": "100%",
+          "height": "320",
+          "gridLineColor": "rgba(240, 243, 250, 0)",
+          "scaleFontColor": "rgba(19, 23, 34, 1)",
+          "tabs": [
+            {
+              "title": "Cripto",
+              "symbols": [
+                { "s": "BITSTAMP:BTCUSD", "d": "Bitcoin" },
+                { "s": "BITSTAMP:ETHUSD", "d": "Ethereum" },
+                { "s": "BINANCE:BNBUSD", "d": "BNB" },
+                { "s": "BINANCE:SOLUSD", "d": "Solana" },
+                { "s": "BINANCE:XRPUSD", "d": "XRP" },
+                { "s": "COINBASE:DOGEUSD", "d": "Dogecoin" }
+              ]
+            }
+          ]
+        }
+        </script>
+      </div>
+      <!-- TradingView Widget END -->
+    </div>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-head">
+      <h2>Tasas de referencia — bancos centrales</h2>
+      <span class="tag">Actualización manual</span>
+    </div>
+    <div class="panel-body pad">
+      <table class="data-table">
+        <thead>
+          <tr><th>País</th><th>Banco central</th><th>Tasa actual</th><th>Última actualización</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>EE. UU.</td><td>Fed</td><td>3.50% – 3.75%</td><td>2026</td></tr>
+          <tr><td>China</td><td>PBOC (LPR 1 año)</td><td>3.00%</td><td>ago. 2026</td></tr>
+          <tr><td>Alemania / España</td><td>BCE</td><td class="needs-update">Verificar en ecb.europa.eu</td><td>—</td></tr>
+          <tr><td>Reino Unido</td><td>BoE</td><td class="needs-update">Verificar en bankofengland.co.uk</td><td>—</td></tr>
+          <tr><td>Brasil</td><td>BCB (Selic)</td><td class="needs-update">Verificar, ~15.00% (2025)</td><td>2025</td></tr>
+          <tr><td>Perú</td><td>BCRP</td><td>4.25%</td><td>mar. 2026</td></tr>
+          <tr><td>Chile</td><td>BCCh</td><td class="needs-update">Verificar en bcentral.cl</td><td>—</td></tr>
+          <tr><td>Colombia</td><td>Banrep</td><td class="needs-update">Verificar, ~9.25% (abr. 2025)</td><td>2025</td></tr>
+          <tr><td>México</td><td>Banxico</td><td>7.00%</td><td>ene. 2026</td></tr>
+        </tbody>
+      </table>
+      <p class="table-note">Estos datos se actualizan manualmente y pueden no reflejar la última decisión de política monetaria. Las filas marcadas requieren verificación directa en la fuente oficial.</p>
+    </div>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-head">
+      <h2>PBI y Reservas Internacionales (RIN)</h2>
+      <span class="tag">Actualización manual</span>
+    </div>
+    <div class="panel-body pad">
+      <table class="data-table">
+        <thead>
+          <tr><th>País</th><th>PBI nominal (aprox.)</th><th>RIN / reservas (% del PBI)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>EE. UU.</td><td class="needs-update">~US$ 29 billones</td><td class="needs-update">Verificar (Fed no reporta como "RIN")</td></tr>
+          <tr><td>China</td><td class="needs-update">~US$ 19 billones</td><td class="needs-update">Verificar en PBOC</td></tr>
+          <tr><td>Alemania</td><td class="needs-update">~US$ 4.7 billones</td><td class="needs-update">Verificar (Bundesbank)</td></tr>
+          <tr><td>Brasil</td><td class="needs-update">~US$ 2.1 billones</td><td>16.5% del PBI</td></tr>
+          <tr><td>Perú</td><td class="needs-update">~US$ 280 mil millones</td><td><strong>28% del PBI</strong> (US$ 100,214 M — jun. 2026)</td></tr>
+          <tr><td>Chile</td><td class="needs-update">~US$ 330 mil millones</td><td>14.1% del PBI</td></tr>
+          <tr><td>Colombia</td><td class="needs-update">~US$ 380 mil millones</td><td>15.1% del PBI</td></tr>
+          <tr><td>México</td><td class="needs-update">~US$ 1.8 billones</td><td>14.1% del PBI</td></tr>
+          <tr><td>España</td><td class="needs-update">~US$ 1.6 billones</td><td class="needs-update">Verificar (Banco de España)</td></tr>
+          <tr><td>Reino Unido</td><td class="needs-update">~US$ 3.3 billones</td><td class="needs-update">Verificar (Bank of England)</td></tr>
+        </tbody>
+      </table>
+      <p class="table-note">Perú verificado con datos del MEF/BCRP (jun. 2026). El resto son estimaciones aproximadas — se recomienda confirmar con la fuente oficial de cada país antes de publicar cifras exactas.</p>
+    </div>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-head">
+      <h2>Perú — indicadores clave</h2>
+      <span class="tag">Actualización manual</span>
+    </div>
+    <div class="panel-body pad">
+      <table class="data-table">
+        <thead>
+          <tr><th>Indicador</th><th>Valor</th><th>Fuente / vigencia</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>UIT 2026</td><td>S/ 5,500</td><td>D.S. 301-2025-EF</td></tr>
+          <tr><td>RMV (sueldo mínimo)</td><td>S/ 1,130 <span class="needs-update">(anuncio de alza a S/1,300 en 2 etapas — verificar si ya rige)</span></td><td>D.S. 006-2024-TR, ago. 2026</td></tr>
+          <tr><td>Población</td><td class="needs-update">~34.4 millones (aprox.)</td><td>INEI, estimación</td></tr>
+          <tr><td>% Informalidad laboral</td><td class="needs-update">~70% (aprox.)</td><td>INEI, estimación</td></tr>
+          <tr><td>Tipo de cambio (uso legal/contable)</td><td class="needs-update">Verificar en sbs.gob.pe</td><td>SBS (publicación diaria)</td></tr>
+          <tr><td>RIN (Reservas Internacionales Netas)</td><td>US$ 100,214 millones (28% del PBI)</td><td>BCRP / MEF, jun. 2026</td></tr>
+        </tbody>
+      </table>
+      <p class="table-note">RMV y RIN verificados con fuentes de 2026. Población e informalidad son aproximaciones — actualízalas con el último dato del INEI cuando publiquen la cifra oficial más reciente.</p>
+    </div>
+  </div>
+
+</section>
+
+<footer>
+  EcoRealTools — Herramientas financieras gratuitas · Hecho en Perú
+</footer>
+
+</body>
+</html>
