@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panel de Mercados — EcoRealTools</title>
-<meta name="description" content="Cotizaciones de bolsas, commodities, divisas y criptomonedas en tiempo real, más indicadores económicos clave de 10 países.">
+<meta name="description" content="Cotizaciones de bolsas, commodities, divisas y criptomonedas en tiempo real, más indicadores económicos clave de 5 países.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
@@ -140,7 +140,7 @@
 <section class="page-head">
   <p class="eyebrow">Panel de mercados</p>
   <h1>Datos financieros y económicos, en un solo lugar.</h1>
-  <p>Cotizaciones de bolsas, materias primas, divisas y criptomonedas en tiempo real — más indicadores económicos clave de 10 países. Todo actualizado directamente desde la fuente, sin registrarte.</p>
+  <p>Cotizaciones de bolsas, materias primas, divisas y criptomonedas en tiempo real — más indicadores económicos clave de 5 países. Todo actualizado directamente desde la fuente, sin registrarte.</p>
 </section>
 
 <section class="panels-wrap">
@@ -186,13 +186,8 @@
                 { "s": "TVC:NDX", "d": "Nasdaq-100 (EE. UU.)" },
                 { "s": "SSE:000001", "d": "Shanghai Composite (China)" },
                 { "s": "XETR:DAX", "d": "DAX (Alemania)" },
-                { "s": "BMFBOVESPA:IBOV", "d": "Ibovespa (Brasil)" },
-                { "s": "BVL:MXNUAMPEGEN", "d": "MSCI NUAM Perú General" },
-                { "s": "BCS:SPIPSA", "d": "S&P IPSA (Chile)" },
-                { "s": "BVC:ICAP", "d": "MSCI COLCAP (Colombia)" },
-                { "s": "INDEX:ME", "d": "IPC México" },
-                { "s": "TVC:IBEX35", "d": "IBEX 35 (España)" },
-                { "s": "FTSE:UKX", "d": "FTSE 100 (Reino Unido)" }
+                { "s": "BVL:SPBLPGPT", "d": "S&P/BVL Perú General" },
+                { "s": "BCS:SPIPSA", "d": "S&P IPSA (Chile)" }
               ]
             }
           ]
@@ -279,14 +274,10 @@
             {
               "title": "Divisas",
               "symbols": [
-                { "s": "ICE:USDPEN", "d": "USD / PEN (Perú)" },
+                { "s": "FX_IDC:USDPEN", "d": "USD / PEN (Perú)" },
                 { "s": "FX_IDC:USDCNY", "d": "USD / CNY (China)" },
-                { "s": "FX:EURUSD", "d": "EUR / USD (Alemania y España)" },
-                { "s": "FX_IDC:USDBRL", "d": "USD / BRL (Brasil)" },
-                { "s": "ICE:USDCLP", "d": "USD / CLP (Chile)" },
-                { "s": "ICE:USDCOP", "d": "USD / COP (Colombia)" },
-                { "s": "FX_IDC:USDMXN", "d": "USD / MXN (México)" },
-                { "s": "FX:GBPUSD", "d": "GBP / USD (Reino Unido)" }
+                { "s": "FX:EURUSD", "d": "EUR / USD (Alemania)" },
+                { "s": "FX_IDC:USDCLP", "d": "USD / CLP (Chile)" }
               ]
             }
           ]
@@ -358,13 +349,9 @@
         <tbody>
           <tr><td>EE. UU.</td><td>Fed</td><td>3.50 – 3.75</td><td>2026</td></tr>
           <tr><td>China</td><td>PBOC (LPR 1 año)</td><td>3.00</td><td>ago. 2026</td></tr>
-          <tr><td>Alemania / España</td><td>BCE</td><td class="needs-update">Verificar</td><td>—</td></tr>
-          <tr><td>Reino Unido</td><td>BoE</td><td class="needs-update">Verificar</td><td>—</td></tr>
-          <tr><td>Brasil</td><td>BCB (Selic)</td><td class="needs-update">~15.00 (verificar)</td><td>2025</td></tr>
+          <tr><td>Alemania</td><td>BCE</td><td class="needs-update">Verificar</td><td>—</td></tr>
           <tr><td>Perú</td><td>BCRP</td><td>4.25</td><td>mar. 2026</td></tr>
           <tr><td>Chile</td><td>BCCh</td><td class="needs-update">Verificar</td><td>—</td></tr>
-          <tr><td>Colombia</td><td>Banrep</td><td class="needs-update">~9.25 (verificar)</td><td>2025</td></tr>
-          <tr><td>México</td><td>Banxico</td><td>7.00</td><td>ene. 2026</td></tr>
         </tbody>
       </table>
       <p class="table-note">Estos datos se actualizan manualmente y pueden no reflejar la última decisión de política monetaria. Las filas marcadas requieren verificación directa en la fuente oficial.</p>
@@ -391,13 +378,8 @@
           <tr><td>EE. UU.</td><td>1.5</td><td class="needs-update">~29,000</td><td class="needs-update">Verificar</td></tr>
           <tr><td>China</td><td>4.3</td><td class="needs-update">~19,000</td><td class="needs-update">Verificar</td></tr>
           <tr><td>Alemania</td><td class="needs-update">0.9 (bloque Zona Euro)</td><td class="needs-update">~4,700</td><td class="needs-update">Verificar</td></tr>
-          <tr><td>España</td><td class="needs-update">0.9 (bloque Zona Euro)</td><td class="needs-update">~1,600</td><td class="needs-update">Verificar</td></tr>
-          <tr><td>Reino Unido</td><td class="needs-update">Verificar</td><td class="needs-update">~3,300</td><td class="needs-update">Verificar</td></tr>
-          <tr><td>Brasil</td><td class="needs-update">2.2 (bloque LatAm)</td><td class="needs-update">~2,100</td><td>16.5</td></tr>
           <tr><td>Perú</td><td><strong>3.5</strong></td><td class="needs-update">~326 (S/ 1,221,417 M, MEF 2026e)</td><td>24.7</td></tr>
           <tr><td>Chile</td><td class="needs-update">2.2 (bloque LatAm)</td><td class="needs-update">~330</td><td>14.1</td></tr>
-          <tr><td>Colombia</td><td class="needs-update">2.2 (bloque LatAm)</td><td class="needs-update">~380</td><td>15.1</td></tr>
-          <tr><td>México</td><td class="needs-update">2.2 (bloque LatAm)</td><td class="needs-update">~1,800</td><td>14.1</td></tr>
         </tbody>
       </table>
       <p class="table-note">Crecimiento y RIN de Perú verificados con MEF (MMM 2026-2029) y BCRP (Reporte de Inflación, jun. 2026). Crecimiento de EE. UU., China y Mundo también del MMM. Brasil, Chile, Colombia y México solo tienen el promedio del bloque América Latina (2.2%) — el MMM no desglosa el crecimiento individual de cada uno; búscalo en su banco central si necesitas el dato exacto. Las celdas en dorado son aproximaciones o requieren verificación directa en la fuente oficial.</p>
