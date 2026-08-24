@@ -117,7 +117,7 @@
   }
 
   .tv-scale-wrap{ overflow:hidden; }
-  .tv-scale-inner{ transform: scale(0.7); transform-origin: top left; width: 142.86%; }
+  .tv-scale-inner{ transform: scale(0.8); transform-origin: top left; width: 125%; }
 
   footer{
     border-top:1px solid var(--line); padding:28px 24px; text-align:center;
@@ -152,7 +152,7 @@
     </div>
     <div class="panel-body">
       <!-- TradingView Widget BEGIN -->
-      <div class="tv-scale-wrap" style="height:588px;">
+      <div class="tv-scale-wrap" style="height:672px;">
       <div class="tv-scale-inner">
       <div class="tradingview-widget-container">
         <div class="tradingview-widget-container__widget"></div>
@@ -212,7 +212,7 @@
     </div>
     <div class="panel-body">
       <!-- TradingView Widget BEGIN -->
-      <div class="tv-scale-wrap" style="height:329px;">
+      <div class="tv-scale-wrap" style="height:376px;">
       <div class="tv-scale-inner">
       <div class="tradingview-widget-container">
         <div class="tradingview-widget-container__widget"></div>
@@ -258,7 +258,7 @@
     </div>
     <div class="panel-body">
       <!-- TradingView Widget BEGIN -->
-      <div class="tv-scale-wrap" style="height:406px;">
+      <div class="tv-scale-wrap" style="height:464px;">
       <div class="tv-scale-inner">
       <div class="tradingview-widget-container">
         <div class="tradingview-widget-container__widget"></div>
@@ -306,7 +306,7 @@
     </div>
     <div class="panel-body">
       <!-- TradingView Widget BEGIN -->
-      <div class="tv-scale-wrap" style="height:329px;">
+      <div class="tv-scale-wrap" style="height:376px;">
       <div class="tv-scale-inner">
       <div class="tradingview-widget-container">
         <div class="tradingview-widget-container__widget"></div>
@@ -427,6 +427,31 @@
         </tbody>
       </table>
       <p class="table-note">RMV, PBI y RIN verificados con fuentes oficiales 2026 (MEF y BCRP). Población e informalidad son aproximaciones — actualízalas con el último dato del INEI cuando publiquen la cifra oficial más reciente.</p>
+    </div>
+  </div>
+
+  <div class="panel-card full-width">
+    <div class="panel-head">
+      <h2>Noticias de economía y finanzas</h2>
+      <span class="tag">Tiempo real</span>
+    </div>
+    <div class="panel-body">
+      <!-- TradingView Widget BEGIN -->
+      <div class="tradingview-widget-container">
+        <div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
+        {
+          "feedMode": "all_symbols",
+          "isTransparent": false,
+          "displayMode": "regular",
+          "width": "100%",
+          "height": "500",
+          "colorTheme": "light",
+          "locale": "es"
+        }
+        </script>
+      </div>
+      <!-- TradingView Widget END -->
     </div>
   </div>
 
