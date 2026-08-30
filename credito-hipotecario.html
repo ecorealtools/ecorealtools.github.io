@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Crédito Hipotecario | EcoRealTools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F6F4EE;
+    --panel: #FFFFFF;
+    --ink: #17231F;
+    --ink-soft: #566761;
+    --teal: #0B4F45;
+    --teal-deep: #08332C;
+    --teal-mist: #E7EFEC;
+    --gold: #B8873A;
+    --gold-soft: #F1E3C8;
+    --line: #DCD6C7;
+    --red: #A23B2E;
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:'Inter', sans-serif; line-height:1.5;}
+  .wrap{max-width:1180px; margin:0 auto; padding:32px 20px 80px;}
+  header.page{display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:28px; border-bottom:1px solid var(--line); padding-bottom:20px;}
+  .brand{font-family:'Fraunces', serif; font-weight:600; font-size:20px; color:var(--teal-deep);}
+  .brand span{color:var(--gold);}
+  h1{font-family:'Fraunces', serif; font-weight:600; font-size:clamp(28px,3.6vw,40px); margin:6px 0 6px; color:var(--teal-deep);}
+  .sub{color:var(--ink-soft); font-size:15px; max-width:62ch;}
+  .eyebrow{text-transform:uppercase; letter-spacing:.12em; font-size:11.5px; font-weight:600; color:var(--gold); margin-bottom:2px;}
+
+  .grid{display:grid; grid-template-columns:1.05fr 0.95fr; gap:24px; align-items:start;}
+  @media (max-width:880px){ .grid{grid-template-columns:1fr;} }
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:26px;}
+  fieldset{border:none; margin:0 0 22px; padding:0;}
+  legend{font-family:'Fraunces', serif; font-weight:600; font-size:16px; color:var(--teal-deep); margin-bottom:12px;}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;}
+  .field-row.single{grid-template-columns:1fr;}
+  @media (max-width:520px){ .field-row{grid-template-columns:1fr;} }
+
+  label{display:block; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em;}
+  .field-hint{font-size:11.5px; color:var(--ink-soft); margin-top:5px; font-weight:400; text-transform:none; letter-spacing:0;}
+  .field-hint.warn{color:var(--red); font-weight:600;}
+
+  input[type=number], select{width:100%; padding:11px 12px; border-radius:9px; border:1.5px solid var(--line); background:#FDFCF9; font-family:'IBM Plex Mono', monospace; font-size:15px; color:var(--ink); transition:border-color .15s;}
+  input[type=number]:focus, select:focus{outline:none; border-color:var(--teal); background:#fff;}
+
+  .toggle-row{display:flex; gap:10px;}
+  .toggle-row button{flex:1; padding:10px 8px; border-radius:9px; border:1.5px solid var(--line); background:#FDFCF9; font-family:'Inter'; font-weight:600; font-size:13px; color:var(--ink-soft); cursor:pointer; transition:.15s;}
+  .toggle-row button.active{background:var(--teal); border-color:var(--teal); color:#fff;}
+
+  .checkbox-line{display:flex; align-items:flex-start; gap:9px; margin-bottom:12px;}
+  .checkbox-line input{width:16px; height:16px; accent-color:var(--teal); margin-top:2px;}
+  .checkbox-line label{margin:0; text-transform:none; font-weight:600; font-size:13.5px; color:var(--ink);}
+  .checkbox-block .field-hint{margin-left:25px; margin-top:0;}
+
+  .result-card{background:var(--teal-deep); color:#F3F1E8; position:sticky; top:20px;}
+  .result-eyebrow{color:#CFE3DC; text-transform:uppercase; font-size:11.5px; letter-spacing:.12em; font-weight:600;}
+  .cuota-figure{font-family:'Fraunces', serif; font-weight:700; font-size:clamp(36px,4.6vw,48px); color:#fff; margin:6px 0 2px; line-height:1;}
+  .cuota-figure small{font-size:15px; font-weight:500; color:#CFE3DC;}
+  .tcea-line{font-size:13.5px; color:#CFE3DC; margin-bottom:18px;}
+  .tcea-line b{color:var(--gold-soft); font-family:'IBM Plex Mono'; font-weight:600;}
+
+  .bar{height:14px; border-radius:7px; overflow:hidden; display:flex; margin-bottom:10px; border:1px solid rgba(255,255,255,.15);}
+  .bar div{height:100%;}
+  .bar-legend{display:flex; gap:14px; flex-wrap:wrap; font-size:11px; color:#CFE3DC; margin-bottom:20px;}
+  .bar-legend span{display:inline-flex; align-items:center; gap:6px;}
+  .dot{width:9px; height:9px; border-radius:50%; display:inline-block;}
+
+  .summary-list{list-style:none; margin:0 0 4px; padding:0; display:grid; gap:9px;}
+  .summary-list li{display:flex; justify-content:space-between; align-items:baseline; padding:9px 0; border-bottom:1px solid rgba(255,255,255,.12); font-size:13px; color:#DCE8E3;}
+  .summary-list li span:last-child{font-family:'IBM Plex Mono'; font-weight:600; color:#fff; font-size:13.8px;}
+  .summary-list li.highlight span:last-child{color:var(--gold-soft);}
+
+  .closing-card{background:var(--gold-soft); border:1px solid #E0C793; margin-top:20px;}
+  .closing-card legend{color:#7A5A1E;}
+  .closing-list{list-style:none; margin:0; padding:0; display:grid; gap:8px;}
+  .closing-list li{display:flex; justify-content:space-between; font-size:13.5px; color:#5E4718; padding:7px 0; border-bottom:1px solid #E0C793;}
+  .closing-list li span:last-child{font-family:'IBM Plex Mono'; font-weight:600; color:#4A3813;}
+  .closing-total{display:flex; justify-content:space-between; margin-top:6px; padding-top:10px; border-top:2px solid #C9A45D; font-weight:700; font-size:14.5px; color:#4A3813;}
+  .closing-total span:last-child{font-family:'IBM Plex Mono';}
+
+  .schedule-wrap{margin-top:28px;}
+  .schedule-head{display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap; margin-bottom:14px;}
+  .table-scroll{overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); max-height:560px; overflow-y:auto;}
+  table{width:100%; border-collapse:collapse; font-family:'IBM Plex Mono', monospace; font-size:12.5px; min-width:900px;}
+  thead th{background:var(--teal-mist); color:var(--teal-deep); text-align:right; padding:11px 12px; font-family:'Inter'; font-weight:700; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; white-space:nowrap; position:sticky; top:0;}
+  thead th:first-child, tbody td:first-child{text-align:left;}
+  tbody td{padding:8px 12px; text-align:right; border-top:1px solid var(--line); white-space:nowrap;}
+  tbody tr:nth-child(even){background:#FBFAF6;}
+  tbody tr.final-row{background:var(--gold-soft); font-weight:600;}
+  tbody tr.year-marker td{background:var(--teal-mist); font-weight:700; color:var(--teal-deep);}
+  .btn-export{padding:10px 18px; border-radius:9px; border:1.5px solid var(--teal); background:#fff; color:var(--teal); font-weight:600; font-size:13.5px; cursor:pointer; font-family:'Inter';}
+  .btn-export:hover{background:var(--teal); color:#fff;}
+
+  .disclaimer{margin-top:20px; font-size:12px; color:var(--ink-soft); border-top:1px solid var(--line); padding-top:16px; max-width:82ch;}
+
+  .feedback{margin-top:40px; border-top:1px solid var(--line); padding-top:24px;}
+  .feedback iframe{width:100%; border:none; min-height:640px; border-radius:var(--radius); background:#fff;}
+  footer.page{margin-top:60px; padding-top:20px; border-top:1px solid var(--line); font-size:12.5px; color:var(--ink-soft); text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <div>
+      <div class="brand">Eco<span>Real</span>Tools</div>
+      <div class="eyebrow">Calculadora financiera</div>
+      <h1>Crédito hipotecario</h1>
+      <p class="sub">Ingresa el valor del inmueble, la cuota inicial y el plazo para ver tu cuota mensual real (con desgravamen y seguro del inmueble), la TCEA, el Bono del Buen Pagador si aplica, y los gastos iniciales de cierre.</p>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- FORM -->
+    <div class="card">
+      <fieldset>
+        <legend>Datos de la propiedad</legend>
+        <div class="field-row">
+          <div>
+            <label for="valorInmueble">Valor del inmueble (S/)</label>
+            <input type="number" id="valorInmueble" value="250000" min="0" step="1000">
+          </div>
+          <div>
+            <label for="cuotaInicialPct">Cuota inicial (%)</label>
+            <input type="number" id="cuotaInicialPct" value="20" min="0" max="90" step="1">
+          </div>
+        </div>
+        <div class="checkbox-block">
+          <div class="checkbox-line">
+            <input type="checkbox" id="chkBBP">
+            <label for="chkBBP">Aplicar Bono del Buen Pagador (S/ 37,000)</label>
+          </div>
+          <div class="field-hint" id="bbpHint">Válido para primera vivienda con valor entre S/ 105,600 y S/ 371,700. Se descuenta del monto a financiar.</div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Datos del crédito</legend>
+        <div class="field-row">
+          <div>
+            <label for="plazoAnios">Plazo (años)</label>
+            <input type="number" id="plazoAnios" value="20" min="1" max="35" step="1">
+          </div>
+          <div>
+            <label for="tasa">Tasa de interés (% anual)</label>
+            <input type="number" id="tasa" value="9" min="0" step="0.01">
+          </div>
+        </div>
+        <div class="field-row">
+          <div>
+            <label>Tipo de tasa</label>
+            <div class="toggle-row">
+              <button type="button" id="btnTEA" class="active" onclick="setTasaTipo('tea')">TEA (efectiva)</button>
+              <button type="button" id="btnTNA" onclick="setTasaTipo('tna')">Nominal (TNA)</button>
+            </div>
+          </div>
+          <div id="capWrap" style="display:none;">
+            <label for="capitalizacion">Capitalización</label>
+            <select id="capitalizacion">
+              <option value="12">Mensual</option>
+              <option value="4">Trimestral</option>
+              <option value="2">Semestral</option>
+              <option value="1">Anual</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Seguros obligatorios</legend>
+        <div class="field-row">
+          <div>
+            <label for="desgravamen">Desgravamen mensual (%)</label>
+            <input type="number" id="desgravamen" value="0.03" min="0" step="0.001">
+            <div class="field-hint">Sobre saldo pendiente. Referencia individual: 0.028%–0.045%.</div>
+          </div>
+          <div>
+            <label>Tipo de titular</label>
+            <div class="toggle-row">
+              <button type="button" id="btnIndividual" class="active" onclick="setTitular('individual')">Individual</button>
+              <button type="button" id="btnMancomunado" onclick="setTitular('mancomunado')">Mancomunado</button>
+            </div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div>
+            <label for="seguroInmueble">Seguro del inmueble mensual (%)</label>
+            <input type="number" id="seguroInmueble" value="0.028" min="0" step="0.001">
+            <div class="field-hint">Sobre el valor del inmueble (fijo cada mes, no baja con el saldo).</div>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Otros cargos mensuales</legend>
+        <div class="field-row">
+          <div>
+            <label for="portes">Portes / mantenimiento (S/)</label>
+            <input type="number" id="portes" value="0" min="0" step="0.5">
+          </div>
+          <div>
+            <div class="checkbox-line" style="margin-top:26px;">
+              <input type="checkbox" id="chkITF" checked>
+              <label for="chkITF">Incluir ITF (0.005%)</label>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="card closing-card" style="padding:18px 20px;">
+        <legend>Gastos iniciales de cierre (no van en la cuota)</legend>
+        <div class="field-row">
+          <div>
+            <label for="tasacion">Tasación (S/)</label>
+            <input type="number" id="tasacion" value="500" min="0" step="10">
+          </div>
+          <div>
+            <label for="notarial">Notarial + registral (S/)</label>
+            <input type="number" id="notarial" value="2500" min="0" step="50">
+          </div>
+        </div>
+        <div class="field-row">
+          <div>
+            <label for="estudioTitulos">Estudio de títulos (S/)</label>
+            <input type="number" id="estudioTitulos" value="450" min="0" step="10">
+          </div>
+          <div>
+            <label for="comisionDesembolso">Comisión de desembolso (S/)</label>
+            <input type="number" id="comisionDesembolso" value="0" min="0" step="10">
+          </div>
+        </div>
+        <div class="field-hint">Impuesto de Alcabala (3% sobre el exceso de 10 UIT ≈ S/ 83,250) se calcula automáticamente según el valor del inmueble.</div>
+      </fieldset>
+    </div>
+
+    <!-- RESULT -->
+    <div>
+      <div class="card result-card">
+        <div class="result-eyebrow">Cuota mensual estimada</div>
+        <div class="cuota-figure" id="cuotaFigure">S/ 0.00</div>
+        <div class="tcea-line">Costo real del crédito (TCEA): <b id="tceaValue">—</b></div>
+
+        <div class="bar" id="compositionBar">
+          <div style="background:var(--gold); width:0%;" id="barCapital"></div>
+          <div style="background:#4C8C7F; width:0%;" id="barInteres"></div>
+          <div style="background:#C1594A; width:0%;" id="barSeguros"></div>
+        </div>
+        <div class="bar-legend">
+          <span><span class="dot" style="background:var(--gold);"></span>Capital</span>
+          <span><span class="dot" style="background:#4C8C7F;"></span>Intereses</span>
+          <span><span class="dot" style="background:#C1594A;"></span>Seguros/otros</span>
+        </div>
+
+        <ul class="summary-list">
+          <li><span>Cuota inicial a pagar</span><span id="sumCuotaInicial">S/ 0.00</span></li>
+          <li class="highlight"><span>Bono Buen Pagador aplicado</span><span id="sumBBP">S/ 0.00</span></li>
+          <li><span>Monto a financiar</span><span id="sumMonto">S/ 0.00</span></li>
+          <li><span>Total de intereses</span><span id="sumInteres">S/ 0.00</span></li>
+          <li><span>Total desgravamen + seguro inmueble</span><span id="sumSeguros">S/ 0.00</span></li>
+          <li><span>Costo total del crédito</span><span id="sumTotal">S/ 0.00</span></li>
+        </ul>
+      </div>
+
+      <div class="card closing-card">
+        <legend style="font-family:'Fraunces',serif; font-weight:600; font-size:15px; margin-bottom:10px;">Gastos de cierre (pago único)</legend>
+        <ul class="closing-list">
+          <li><span>Tasación</span><span id="cTasacion">S/ 0.00</span></li>
+          <li><span>Notarial + registral</span><span id="cNotarial">S/ 0.00</span></li>
+          <li><span>Estudio de títulos</span><span id="cEstudio">S/ 0.00</span></li>
+          <li><span>Impuesto de Alcabala</span><span id="cAlcabala">S/ 0.00</span></li>
+          <li><span>Comisión de desembolso</span><span id="cComision">S/ 0.00</span></li>
+        </ul>
+        <div class="closing-total"><span>Total gastos de cierre</span><span id="cTotal">S/ 0.00</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHEDULE -->
+  <div class="schedule-wrap">
+    <div class="schedule-head">
+      <div>
+        <div class="eyebrow">Detalle mes a mes</div>
+        <h2 style="font-family:'Fraunces',serif; font-weight:600; font-size:22px; margin:4px 0; color:var(--teal-deep);">Cronograma de pagos</h2>
+      </div>
+      <button class="btn-export" onclick="exportCSV()">Descargar cronograma (CSV)</button>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>N° cuota</th>
+            <th>Saldo inicial</th>
+            <th>Cuota base</th>
+            <th>Interés</th>
+            <th>Capital</th>
+            <th>Desgravamen</th>
+            <th>Seg. inmueble</th>
+            <th>Portes</th>
+            <th>Pago total</th>
+            <th>Saldo final</th>
+          </tr>
+        </thead>
+        <tbody id="scheduleBody"></tbody>
+      </table>
+    </div>
+    <p class="disclaimer">
+      Cálculo referencial bajo sistema de cuotas fijas (sistema francés). El seguro de desgravamen se calcula sobre el saldo pendiente de cada mes; el seguro del inmueble se calcula sobre el valor de la propiedad y se mantiene constante. La TCEA es una aproximación vía TIR del flujo real de pagos frente al monto neto desembolsado. El Bono del Buen Pagador y sus rangos de aplicación son referenciales al programa Fondo MiVivienda vigente — confirma el monto y elegibilidad actual con tu banco o en fondomivivienda.com.pe. Verifica siempre las condiciones exactas con tu entidad financiera antes de decidir.
+    </p>
+  </div>
+
+  <!-- FEEDBACK -->
+  <div class="feedback">
+    <div class="eyebrow">¿Encontraste un error o falta algo?</div>
+    <p class="sub" style="margin-bottom:14px;">Cuéntanos qué mejorarías de esta calculadora.</p>
+    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfw5GWpod6ZS2YrvGZ43ChOZmicjCA3WsfviTd53VTC7PYk9A/viewform?embedded=true" title="Formulario de sugerencias"></iframe>
+  </div>
+
+  <footer class="page">EcoRealTools — herramientas financieras para el día a día · Perú</footer>
+</div>
+
+<script>
+let tasaTipo = 'tea';
+let titular = 'individual';
+
+function setTasaTipo(tipo){
+  tasaTipo = tipo;
+  document.getElementById('btnTEA').classList.toggle('active', tipo==='tea');
+  document.getElementById('btnTNA').classList.toggle('active', tipo==='tna');
+  document.getElementById('capWrap').style.display = (tipo==='tna') ? 'block' : 'none';
+  calcular();
+}
+function setTitular(t){
+  titular = t;
+  document.getElementById('btnIndividual').classList.toggle('active', t==='individual');
+  document.getElementById('btnMancomunado').classList.toggle('active', t==='mancomunado');
+  const desgInput = document.getElementById('desgravamen');
+  // Ajusta referencia sugerida al cambiar tipo de titular (el usuario puede editarla igual)
+  desgInput.value = (t==='mancomunado') ? (parseFloat(desgInput.value)*2).toFixed(3) : (parseFloat(desgInput.value)/2).toFixed(3);
+  calcular();
+}
+
+function fmt(n){
+  if(!isFinite(n)) n = 0;
+  return 'S/ ' + n.toLocaleString('es-PE', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function fmtPct(n){ return n.toLocaleString('es-PE', {minimumFractionDigits:2, maximumFractionDigits:2}) + '%'; }
+
+function getTEM(){
+  const tasaInput = parseFloat(document.getElementById('tasa').value) || 0;
+  if(tasaTipo === 'tea'){
+    const tea = tasaInput/100;
+    return Math.pow(1+tea, 1/12) - 1;
+  } else {
+    const tna = tasaInput/100;
+    const m = parseInt(document.getElementById('capitalizacion').value) || 12;
+    const tep = tna/m;
+    const teaEq = Math.pow(1+tep, m) - 1;
+    return Math.pow(1+teaEq, 1/12) - 1;
+  }
+}
+
+let lastSchedule = [];
+
+function calcular(){
+  const valorInmueble = parseFloat(document.getElementById('valorInmueble').value) || 0;
+  const cuotaInicialPct = parseFloat(document.getElementById('cuotaInicialPct').value) || 0;
+  const anios = parseInt(document.getElementById('plazoAnios').value) || 0;
+  const plazo = anios * 12;
+  const tem = getTEM();
+  const desgTasa = (parseFloat(document.getElementById('desgravamen').value) || 0) / 100;
+  const seguroInmuebleTasa = (parseFloat(document.getElementById('seguroInmueble').value) || 0) / 100;
+  const portes = parseFloat(document.getElementById('portes').value) || 0;
+  const incluirITF = document.getElementById('chkITF').checked;
+  const itfTasa = 0.00005;
+
+  const tasacion = parseFloat(document.getElementById('tasacion').value) || 0;
+  const notarial = parseFloat(document.getElementById('notarial').value) || 0;
+  const estudioTitulos = parseFloat(document.getElementById('estudioTitulos').value) || 0;
+  const comisionDesembolso = parseFloat(document.getElementById('comisionDesembolso').value) || 0;
+
+  if(valorInmueble<=0 || plazo<=0){ return; }
+
+  const cuotaInicial = valorInmueble * (cuotaInicialPct/100);
+
+  // Bono del Buen Pagador
+  const bbpElegible = valorInmueble >= 105600 && valorInmueble <= 371700;
+  const chkBBP = document.getElementById('chkBBP');
+  const bbpAplicado = chkBBP.checked && bbpElegible;
+  const bbpMonto = bbpAplicado ? 37000 : 0;
+  document.getElementById('bbpHint').classList.toggle('warn', chkBBP.checked && !bbpElegible);
+  document.getElementById('bbpHint').textContent = (chkBBP.checked && !bbpElegible)
+    ? 'El valor del inmueble está fuera del rango del BBP (S/ 105,600 – S/ 371,700), no se aplicará.'
+    : 'Válido para primera vivienda con valor entre S/ 105,600 y S/ 371,700. Se descuenta del monto a financiar.';
+
+  const montoFinanciar = Math.max(valorInmueble - cuotaInicial - bbpMonto, 0);
+
+  const cuotaBase = tem === 0 ? montoFinanciar/plazo : montoFinanciar * (tem * Math.pow(1+tem,plazo)) / (Math.pow(1+tem,plazo)-1);
+
+  let saldo = montoFinanciar;
+  let totalInteres=0, totalDesg=0, totalSeguroInmueble=0, totalCapital=0, totalPortes=0;
+  lastSchedule = [];
+
+  for(let i=1;i<=plazo;i++){
+    const interes = saldo * tem;
+    let capital = cuotaBase - interes;
+    if(i===plazo){ capital = saldo; }
+    const desg = saldo * desgTasa;
+    const segInmueble = valorInmueble * seguroInmuebleTasa;
+    const cuotaTotal = capital + interes + desg + segInmueble + portes;
+    const saldoFinal = Math.max(saldo - capital, 0);
+
+    lastSchedule.push({n:i, saldoInicial:saldo, cuota:cuotaBase, interes, capital, desg, segInmueble, portes, total:cuotaTotal, saldoFinal});
+
+    totalInteres += interes;
+    totalDesg += desg;
+    totalSeguroInmueble += segInmueble;
+    totalCapital += capital;
+    totalPortes += portes;
+    saldo = saldoFinal;
+  }
+
+  const itf = incluirITF ? montoFinanciar * itfTasa : 0;
+  const totalSeguros = totalDesg + totalSeguroInmueble + totalPortes + itf;
+  const costoTotal = totalInteres + totalSeguros;
+
+  function flujoVAN(tasaMensual){
+    let van = -(montoFinanciar - itf - comisionDesembolso);
+    lastSchedule.forEach(row=>{ van += row.total / Math.pow(1+tasaMensual, row.n); });
+    return van;
+  }
+  let r = tem>0?tem:0.005, paso=0.0001;
+  for(let iter=0; iter<200; iter++){
+    const f = flujoVAN(r);
+    const fPrima = (flujoVAN(r+paso)-f)/paso;
+    if(fPrima===0) break;
+    const rNuevo = r - f/fPrima;
+    if(Math.abs(rNuevo-r) < 1e-9){ r = rNuevo; break; }
+    r = rNuevo;
+  }
+  const tceaAnual = (Math.pow(1+r,12)-1)*100;
+
+  document.getElementById('cuotaFigure').innerHTML = fmt(cuotaBase) + ' <small>/ mes (base)</small>';
+  document.getElementById('tceaValue').textContent = isFinite(tceaAnual) ? fmtPct(tceaAnual) : '—';
+  document.getElementById('sumCuotaInicial').textContent = fmt(cuotaInicial);
+  document.getElementById('sumBBP').textContent = bbpAplicado ? '– ' + fmt(bbpMonto) : 'No aplicado';
+  document.getElementById('sumMonto').textContent = fmt(montoFinanciar);
+  document.getElementById('sumInteres').textContent = fmt(totalInteres);
+  document.getElementById('sumSeguros').textContent = fmt(totalDesg + totalSeguroInmueble);
+  document.getElementById('sumTotal').textContent = fmt(montoFinanciar + costoTotal);
+
+  const totalBarBase = totalCapital + totalInteres + totalSeguros;
+  document.getElementById('barCapital').style.width = (totalCapital/totalBarBase*100)+'%';
+  document.getElementById('barInteres').style.width = (totalInteres/totalBarBase*100)+'%';
+  document.getElementById('barSeguros').style.width = (totalSeguros/totalBarBase*100)+'%';
+
+  // Gastos de cierre
+  const uitExento = 83250;
+  const alcabala = Math.max(valorInmueble - uitExento, 0) * 0.03;
+  document.getElementById('cTasacion').textContent = fmt(tasacion);
+  document.getElementById('cNotarial').textContent = fmt(notarial);
+  document.getElementById('cEstudio').textContent = fmt(estudioTitulos);
+  document.getElementById('cAlcabala').textContent = fmt(alcabala);
+  document.getElementById('cComision').textContent = fmt(comisionDesembolso);
+  document.getElementById('cTotal').textContent = fmt(tasacion+notarial+estudioTitulos+alcabala+comisionDesembolso);
+
+  const tbody = document.getElementById('scheduleBody');
+  tbody.innerHTML = '';
+  lastSchedule.forEach(row=>{
+    if(row.n>1 && (row.n-1)%12===0){
+      const yearRow = document.createElement('tr');
+      yearRow.classList.add('year-marker');
+      yearRow.innerHTML = `<td colspan="10">Año ${Math.floor((row.n-1)/12)+1}</td>`;
+      tbody.appendChild(yearRow);
+    }
+    const tr = document.createElement('tr');
+    if(row.n === plazo) tr.classList.add('final-row');
+    tr.innerHTML = `
+      <td>${row.n}</td>
+      <td>${fmt(row.saldoInicial)}</td>
+      <td>${fmt(row.cuota)}</td>
+      <td>${fmt(row.interes)}</td>
+      <td>${fmt(row.capital)}</td>
+      <td>${fmt(row.desg)}</td>
+      <td>${fmt(row.segInmueble)}</td>
+      <td>${fmt(row.portes)}</td>
+      <td>${fmt(row.total)}</td>
+      <td>${fmt(row.saldoFinal)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function exportCSV(){
+  if(!lastSchedule.length) return;
+  let csv = 'N° Cuota,Saldo Inicial,Cuota Base,Interes,Capital,Desgravamen,Seguro Inmueble,Portes,Pago Total,Saldo Final\n';
+  lastSchedule.forEach(row=>{
+    csv += [row.n, row.saldoInicial.toFixed(2), row.cuota.toFixed(2), row.interes.toFixed(2),
+            row.capital.toFixed(2), row.desg.toFixed(2), row.segInmueble.toFixed(2), row.portes.toFixed(2),
+            row.total.toFixed(2), row.saldoFinal.toFixed(2)].join(',') + '\n';
+  });
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'cronograma-credito-hipotecario.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+['valorInmueble','cuotaInicialPct','plazoAnios','tasa','desgravamen','seguroInmueble','portes',
+ 'tasacion','notarial','estudioTitulos','comisionDesembolso'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', calcular);
+});
+document.getElementById('chkITF').addEventListener('change', calcular);
+document.getElementById('chkBBP').addEventListener('change', calcular);
+document.getElementById('capitalizacion').addEventListener('change', calcular);
+
+calcular();
+</script>
+</body>
+</html>
