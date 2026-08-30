@@ -53,12 +53,44 @@
     text-transform:uppercase; border:1px solid rgba(217,169,74,0.4);
     padding:2px 6px; border-radius:2px;
   }
-  nav a{
+  nav{ display:flex; align-items:center; }
+  nav a.simple-link{
     color: rgba(251,252,250,0.72); text-decoration:none;
     font-size:0.92rem; font-weight:500; margin-left:28px;
     transition:color .15s ease;
   }
-  nav a:hover{ color: var(--gold-2); }
+  nav a.simple-link:hover{ color: var(--gold-2); }
+
+  .nav-dropdown{ position:relative; margin-left:28px; }
+  .nav-dropdown-btn{
+    background:none; border:none; cursor:pointer; font-family:'Inter', sans-serif;
+    color: rgba(251,252,250,0.72); font-size:0.92rem; font-weight:500;
+    display:flex; align-items:center; gap:5px; padding:4px 0;
+    transition:color .15s ease;
+  }
+  .nav-dropdown-btn:hover, .nav-dropdown.open .nav-dropdown-btn{ color: var(--gold-2); }
+  .nav-dropdown-btn svg{ width:11px; height:11px; transition:transform .15s ease; }
+  .nav-dropdown.open .nav-dropdown-btn svg{ transform:rotate(180deg); }
+
+  .nav-dropdown-menu{
+    position:absolute; top:calc(100% + 14px); right:0; min-width:240px;
+    background: var(--navy-2); border:1px solid rgba(255,255,255,0.1);
+    border-radius:6px; padding:8px; display:none;
+    box-shadow:0 12px 28px rgba(0,0,0,0.35);
+  }
+  .nav-dropdown.open .nav-dropdown-menu{ display:block; }
+  .nav-dropdown-menu a{
+    display:block; padding:10px 12px; border-radius:4px;
+    color: rgba(251,252,250,0.85); text-decoration:none; font-size:0.88rem;
+    transition: background .12s ease;
+  }
+  .nav-dropdown-menu a:hover{ background: rgba(255,255,255,0.06); color: var(--gold-2); }
+  .nav-dropdown-menu a .tool-desc{
+    display:block; font-size:0.74rem; color: rgba(251,252,250,0.5); margin-top:2px;
+  }
+  .nav-dropdown-menu .menu-divider{
+    height:1px; background: rgba(255,255,255,0.08); margin:6px 4px;
+  }
 
   /* ===== Hero ===== */
   .hero{
@@ -189,6 +221,33 @@
   .explainer h3{ font-family:'Fraunces', serif; font-size:1.15rem; color:var(--navy); margin:0 0 10px; }
   .explainer p{ color:var(--ink-soft); font-size:0.95rem; line-height:1.6; margin:0 0 20px; }
 
+  /* ===== Más herramientas ===== */
+  .tools-section{ max-width:1080px; margin:0 auto 80px; padding:0 24px; }
+  .tools-section .eyebrow{ margin-bottom:6px; }
+  .tools-section h3{
+    font-family:'Fraunces', serif; font-size:1.5rem; font-weight:600; color:var(--navy); margin:0 0 6px;
+  }
+  .tools-section > p.lead{ color:var(--ink-soft); font-size:0.95rem; margin:0 0 28px; max-width:60ch; }
+  .tools-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:18px;
+  }
+  @media (max-width:800px){ .tools-grid{ grid-template-columns:1fr; } }
+  .tool-card{
+    display:block; text-decoration:none; background:var(--white);
+    border:1px solid var(--line); border-radius:var(--radius);
+    padding:26px; transition:border-color .15s ease, transform .15s ease;
+  }
+  .tool-card:hover{ border-color:var(--gold); transform:translateY(-2px); }
+  .tool-card .tag{
+    font-family:'IBM Plex Mono', monospace; font-size:0.68rem; letter-spacing:0.1em;
+    text-transform:uppercase; color:var(--gold); margin:0 0 10px;
+  }
+  .tool-card h4{
+    font-family:'Fraunces', serif; font-weight:600; font-size:1.1rem; color:var(--navy); margin:0 0 8px;
+  }
+  .tool-card p{ font-size:0.85rem; color:var(--ink-soft); line-height:1.5; margin:0; }
+  .tool-card.disabled{ opacity:0.5; cursor:default; pointer-events:none; }
+
   .feedback-section{ max-width:1080px; margin:0 auto 80px; padding:0 24px; }
   .feedback-card{
     background: var(--white); border:1px solid var(--line); border-radius:var(--radius);
@@ -223,9 +282,27 @@
   <div class="nav-wrap">
     <a href="index.html" class="brand">EcoReal <small>Tools</small></a>
     <nav>
-      <a href="#calculadora">Calculadora</a>
-      <a href="#como-funciona">Cómo funciona</a>
-      <a href="panel-mercados.html">Panel de mercados</a>
+      <a href="#calculadora" class="simple-link">Interés compuesto</a>
+      <div class="nav-dropdown" id="navDropdown">
+        <button type="button" class="nav-dropdown-btn" id="navDropdownBtn" aria-expanded="false">
+          Herramientas
+          <svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="nav-dropdown-menu">
+          <a href="prestamos-personales.html">Préstamo personal
+            <span class="tool-desc">Cuota, TCEA y cronograma</span>
+          </a>
+          <a href="credito-hipotecario.html">Crédito hipotecario
+            <span class="tool-desc">Cuota, Bono Buen Pagador y gastos de cierre</span>
+          </a>
+          <div class="menu-divider"></div>
+          <a href="panel-mercados.html">Panel de mercados
+            <span class="tool-desc">Bolsas, tipo de cambio, cripto en vivo</span>
+          </a>
+          <div class="menu-divider"></div>
+          <a href="#herramientas">Ver todas las herramientas</a>
+        </div>
+      </div>
     </nav>
   </div>
 </header>
@@ -342,6 +419,34 @@
   </div>
 </section>
 
+<section class="tools-section" id="herramientas">
+  <p class="eyebrow">Explora más</p>
+  <h3>Todas las herramientas</h3>
+  <p class="lead">Calculadoras y paneles gratuitos, hechos para el día a día en Perú. Todo se calcula en tu navegador, sin registro.</p>
+  <div class="tools-grid">
+    <a href="#calculadora" class="tool-card">
+      <p class="tag">Calculadora</p>
+      <h4>Interés compuesto</h4>
+      <p>Proyecta cómo crece tu dinero con aportes mensuales y capitalización.</p>
+    </a>
+    <a href="prestamos-personales.html" class="tool-card">
+      <p class="tag">Calculadora</p>
+      <h4>Préstamo personal</h4>
+      <p>Cuota, TCEA, desgravamen y cronograma para préstamos y compra de deuda de tarjeta.</p>
+    </a>
+    <a href="credito-hipotecario.html" class="tool-card">
+      <p class="tag">Calculadora</p>
+      <h4>Crédito hipotecario</h4>
+      <p>Cuota, Bono del Buen Pagador, seguros y gastos de cierre para tu vivienda.</p>
+    </a>
+    <a href="panel-mercados.html" class="tool-card">
+      <p class="tag">Panel en vivo</p>
+      <h4>Panel de mercados</h4>
+      <p>Bolsas, tipo de cambio, commodities, cripto e indicadores de Perú en un solo lugar.</p>
+    </a>
+  </div>
+</section>
+
 <section class="feedback-section" id="sugerencias">
   <div class="feedback-card">
     <p class="eyebrow" style="margin-bottom:8px;">Tu opinión</p>
@@ -363,6 +468,29 @@
 </footer>
 
 <script>
+  // ===== Menú desplegable de herramientas =====
+  (function(){
+    const dropdown = document.getElementById('navDropdown');
+    const btn = document.getElementById('navDropdownBtn');
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      const isOpen = dropdown.classList.toggle('open');
+      btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+    document.addEventListener('click', function(e){
+      if(!dropdown.contains(e.target)){
+        dropdown.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape'){
+        dropdown.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  })();
+
   const els = {
     inicial: document.getElementById('inicial'),
     inicialRange: document.getElementById('inicialRange'),
