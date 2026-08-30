@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Préstamo Personal | EcoRealTools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F6F4EE;
+    --panel: #FFFFFF;
+    --ink: #17231F;
+    --ink-soft: #566761;
+    --teal: #0B4F45;
+    --teal-deep: #08332C;
+    --teal-mist: #E7EFEC;
+    --gold: #B8873A;
+    --gold-soft: #F1E3C8;
+    --line: #DCD6C7;
+    --red: #A23B2E;
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    line-height:1.5;
+  }
+  .wrap{max-width:1180px; margin:0 auto; padding:32px 20px 80px;}
+  header.page{
+    display:flex; align-items:baseline; justify-content:space-between;
+    gap:16px; flex-wrap:wrap; margin-bottom:28px;
+    border-bottom:1px solid var(--line); padding-bottom:20px;
+  }
+  .brand{font-family:'Fraunces', serif; font-weight:600; font-size:20px; color:var(--teal-deep); letter-spacing:.2px;}
+  .brand span{color:var(--gold);}
+  h1{
+    font-family:'Fraunces', serif; font-weight:600; font-size:clamp(28px,3.6vw,40px);
+    margin:6px 0 6px; color:var(--teal-deep);
+  }
+  .sub{color:var(--ink-soft); font-size:15px; max-width:60ch;}
+  .eyebrow{
+    text-transform:uppercase; letter-spacing:.12em; font-size:11.5px; font-weight:600;
+    color:var(--gold); margin-bottom:2px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap:24px;
+    align-items:start;
+  }
+  @media (max-width:880px){ .grid{grid-template-columns:1fr;} }
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:26px;
+  }
+
+  fieldset{border:none; margin:0 0 22px; padding:0;}
+  legend{
+    font-family:'Fraunces', serif; font-weight:600; font-size:16px;
+    color:var(--teal-deep); margin-bottom:12px; padding:0;
+  }
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;}
+  .field-row.single{grid-template-columns:1fr;}
+  @media (max-width:520px){ .field-row{grid-template-columns:1fr;} }
+
+  label{
+    display:block; font-size:12.5px; font-weight:600; color:var(--ink-soft);
+    margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em;
+  }
+  .field-hint{font-size:11.5px; color:var(--ink-soft); margin-top:5px; font-weight:400; text-transform:none; letter-spacing:0;}
+
+  input[type=number], select{
+    width:100%; padding:11px 12px; border-radius:9px;
+    border:1.5px solid var(--line); background:#FDFCF9;
+    font-family:'IBM Plex Mono', monospace; font-size:15px; color:var(--ink);
+    transition:border-color .15s;
+  }
+  input[type=number]:focus, select:focus{
+    outline:none; border-color:var(--teal); background:#fff;
+  }
+
+  .toggle-row{display:flex; gap:10px;}
+  .toggle-row button{
+    flex:1; padding:10px 8px; border-radius:9px; border:1.5px solid var(--line);
+    background:#FDFCF9; font-family:'Inter'; font-weight:600; font-size:13.5px;
+    color:var(--ink-soft); cursor:pointer; transition:.15s;
+  }
+  .toggle-row button.active{
+    background:var(--teal); border-color:var(--teal); color:#fff;
+  }
+
+  .checkbox-line{display:flex; align-items:center; gap:9px; margin-bottom:10px;}
+  .checkbox-line input{width:16px; height:16px; accent-color:var(--teal);}
+  .checkbox-line label{margin:0; text-transform:none; font-weight:500; font-size:13.5px; color:var(--ink);}
+
+  /* Result panel */
+  .result-card{
+    background:var(--teal-deep);
+    color:#F3F1E8;
+    position:sticky; top:20px;
+  }
+  .result-eyebrow{color:#CFE3DC; text-transform:uppercase; font-size:11.5px; letter-spacing:.12em; font-weight:600;}
+  .cuota-figure{
+    font-family:'Fraunces', serif; font-weight:700; font-size:clamp(38px,5vw,52px);
+    color:#fff; margin:6px 0 2px; line-height:1;
+  }
+  .cuota-figure small{font-size:16px; font-weight:500; color:#CFE3DC;}
+  .tcea-line{font-size:13.5px; color:#CFE3DC; margin-bottom:22px;}
+  .tcea-line b{color:var(--gold-soft); font-family:'IBM Plex Mono'; font-weight:600;}
+
+  .summary-list{list-style:none; margin:0 0 22px; padding:0; display:grid; gap:10px;}
+  .summary-list li{
+    display:flex; justify-content:space-between; align-items:baseline;
+    padding:10px 0; border-bottom:1px solid rgba(255,255,255,.12);
+    font-size:13.5px; color:#DCE8E3;
+  }
+  .summary-list li span:last-child{font-family:'IBM Plex Mono'; font-weight:600; color:#fff; font-size:14.5px;}
+
+  .bar{
+    height:14px; border-radius:7px; overflow:hidden; display:flex; margin-bottom:10px;
+    border:1px solid rgba(255,255,255,.15);
+  }
+  .bar div{height:100%;}
+  .bar-legend{display:flex; gap:16px; flex-wrap:wrap; font-size:11.5px; color:#CFE3DC;}
+  .bar-legend span{display:inline-flex; align-items:center; gap:6px;}
+  .dot{width:9px; height:9px; border-radius:50%; display:inline-block;}
+
+  /* Schedule table */
+  .schedule-wrap{margin-top:28px;}
+  .schedule-head{
+    display:flex; justify-content:space-between; align-items:flex-end; gap:12px;
+    flex-wrap:wrap; margin-bottom:14px;
+  }
+  .table-scroll{
+    overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius);
+    background:var(--panel);
+  }
+  table{width:100%; border-collapse:collapse; font-family:'IBM Plex Mono', monospace; font-size:12.8px; min-width:820px;}
+  thead th{
+    background:var(--teal-mist); color:var(--teal-deep); text-align:right;
+    padding:11px 12px; font-family:'Inter'; font-weight:700; font-size:11px;
+    text-transform:uppercase; letter-spacing:.05em; white-space:nowrap;
+    position:sticky; top:0;
+  }
+  thead th:first-child, tbody td:first-child{text-align:left;}
+  tbody td{padding:9px 12px; text-align:right; border-top:1px solid var(--line); white-space:nowrap;}
+  tbody tr:nth-child(even){background:#FBFAF6;}
+  tbody tr.final-row{background:var(--gold-soft); font-weight:600;}
+  .btn-export{
+    padding:10px 18px; border-radius:9px; border:1.5px solid var(--teal);
+    background:#fff; color:var(--teal); font-weight:600; font-size:13.5px;
+    cursor:pointer; font-family:'Inter';
+  }
+  .btn-export:hover{background:var(--teal); color:#fff;}
+
+  .disclaimer{
+    margin-top:20px; font-size:12px; color:var(--ink-soft); border-top:1px solid var(--line);
+    padding-top:16px; max-width:80ch;
+  }
+
+  .feedback{
+    margin-top:40px; border-top:1px solid var(--line); padding-top:24px;
+  }
+  .feedback .eyebrow{margin-bottom:6px;}
+  .feedback iframe{width:100%; border:none; min-height:640px; border-radius:var(--radius); background:#fff;}
+
+  footer.page{margin-top:60px; padding-top:20px; border-top:1px solid var(--line); font-size:12.5px; color:var(--ink-soft); text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <div>
+      <div class="brand">Eco<span>Real</span>Tools</div>
+      <div class="eyebrow">Calculadora financiera</div>
+      <h1>Préstamo personal &amp; compra de deuda</h1>
+      <p class="sub">Ingresa el monto, la tasa y el plazo para ver tu cuota exacta, el costo real del crédito (TCEA) y el cronograma de pagos mes a mes, incluyendo seguro de desgravamen sobre saldo.</p>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- FORM -->
+    <div class="card">
+      <fieldset>
+        <legend>Datos del préstamo</legend>
+        <div class="field-row">
+          <div>
+            <label for="monto">Monto solicitado (S/)</label>
+            <input type="number" id="monto" value="10000" min="0" step="100">
+          </div>
+          <div>
+            <label for="plazo">Plazo (meses)</label>
+            <input type="number" id="plazo" value="24" min="1" step="1">
+          </div>
+        </div>
+        <div class="field-row">
+          <div>
+            <label for="tasa">Tasa de interés (% anual)</label>
+            <input type="number" id="tasa" value="35" min="0" step="0.01">
+            <div class="field-hint">Ingresa la TEA que te indica el banco.</div>
+          </div>
+          <div>
+            <label>Tipo de tasa</label>
+            <div class="toggle-row">
+              <button type="button" id="btnTEA" class="active" onclick="setTasaTipo('tea')">TEA (efectiva)</button>
+              <button type="button" id="btnTNA" onclick="setTasaTipo('tna')">Nominal (TNA)</button>
+            </div>
+          </div>
+        </div>
+        <div class="field-row" id="capRow" style="display:none;">
+          <div>
+            <label for="capitalizacion">Capitalización</label>
+            <select id="capitalizacion">
+              <option value="12">Mensual</option>
+              <option value="4">Trimestral</option>
+              <option value="2">Semestral</option>
+              <option value="1">Anual</option>
+            </select>
+            <div class="field-hint">Con qué frecuencia se capitaliza la tasa nominal.</div>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Seguro de desgravamen</legend>
+        <div class="field-row">
+          <div>
+            <label for="desgravamen">Tasa mensual (%)</label>
+            <input type="number" id="desgravamen" value="0.05" min="0" step="0.001">
+            <div class="field-hint">Se aplica sobre el saldo pendiente cada mes (así lo calculan los bancos). Referencia: 0.028%–0.09% mensual.</div>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Comisiones y otros cargos</legend>
+        <div class="checkbox-line">
+          <input type="checkbox" id="chkITF" checked>
+          <label for="chkITF">Incluir ITF (0.005% por desembolso)</label>
+        </div>
+        <div class="field-row">
+          <div>
+            <label for="comisionUnica">Comisión única de desembolso (S/)</label>
+            <input type="number" id="comisionUnica" value="0" min="0" step="1">
+          </div>
+          <div>
+            <label for="comisionMensual">Comisión de mantenimiento mensual (S/)</label>
+            <input type="number" id="comisionMensual" value="0" min="0" step="0.5">
+          </div>
+        </div>
+      </fieldset>
+    </div>
+
+    <!-- RESULT -->
+    <div class="card result-card">
+      <div class="result-eyebrow">Cuota mensual estimada</div>
+      <div class="cuota-figure" id="cuotaFigure">S/ 0.00</div>
+      <div class="tcea-line">Costo real del crédito (TCEA): <b id="tceaValue">—</b></div>
+
+      <div class="bar" id="compositionBar">
+        <div style="background:var(--gold); width:0%;" id="barCapital"></div>
+        <div style="background:#4C8C7F; width:0%;" id="barInteres"></div>
+        <div style="background:#C1594A; width:0%;" id="barSeguros"></div>
+      </div>
+      <div class="bar-legend">
+        <span><span class="dot" style="background:var(--gold);"></span>Capital</span>
+        <span><span class="dot" style="background:#4C8C7F;"></span>Intereses</span>
+        <span><span class="dot" style="background:#C1594A;"></span>Seguros y comisiones</span>
+      </div>
+
+      <ul class="summary-list">
+        <li><span>Monto financiado</span><span id="sumMonto">S/ 0.00</span></li>
+        <li><span>Total de intereses</span><span id="sumInteres">S/ 0.00</span></li>
+        <li><span>Total seguro de desgravamen</span><span id="sumDesg">S/ 0.00</span></li>
+        <li><span>Total comisiones + ITF</span><span id="sumComision">S/ 0.00</span></li>
+        <li><span>Costo total del préstamo</span><span id="sumTotal">S/ 0.00</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SCHEDULE -->
+  <div class="schedule-wrap">
+    <div class="schedule-head">
+      <div>
+        <div class="eyebrow">Detalle mes a mes</div>
+        <h2 style="font-family:'Fraunces',serif; font-weight:600; font-size:22px; margin:4px 0; color:var(--teal-deep);">Cronograma de pagos</h2>
+      </div>
+      <button class="btn-export" onclick="exportCSV()">Descargar cronograma (CSV)</button>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>N° cuota</th>
+            <th>Saldo inicial</th>
+            <th>Cuota</th>
+            <th>Interés</th>
+            <th>Capital</th>
+            <th>Desgravamen</th>
+            <th>Comisión</th>
+            <th>Pago total</th>
+            <th>Saldo final</th>
+          </tr>
+        </thead>
+        <tbody id="scheduleBody"></tbody>
+      </table>
+    </div>
+    <p class="disclaimer">
+      Cálculo referencial bajo sistema de cuotas fijas (sistema francés). El desgravamen se calcula sobre el saldo insoluto de cada mes, como lo aplican los bancos peruanos para créditos personales. La TCEA es una aproximación calculada como la tasa interna de retorno del flujo de pagos frente al monto neto desembolsado; el valor exacto puede variar ligeramente según la metodología de cada entidad. Verifica siempre las condiciones exactas con tu banco antes de decidir.
+    </p>
+  </div>
+
+  <!-- FEEDBACK -->
+  <div class="feedback">
+    <div class="eyebrow">¿Encontraste un error o falta algo?</div>
+    <p class="sub" style="margin-bottom:14px;">Cuéntanos qué mejorarías de esta calculadora.</p>
+    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfQJCBoqnHbaJeo3Z9oe_woFNWtszkWIZPQ4BuR8G_XkoZHIg/viewform?embedded=true" title="Formulario de sugerencias"></iframe>
+  </div>
+
+  <footer class="page">EcoRealTools — herramientas financieras para el día a día · Perú</footer>
+</div>
+
+<script>
+let tasaTipo = 'tea';
+
+function setTasaTipo(tipo){
+  tasaTipo = tipo;
+  document.getElementById('btnTEA').classList.toggle('active', tipo==='tea');
+  document.getElementById('btnTNA').classList.toggle('active', tipo==='tna');
+  document.getElementById('capRow').style.display = (tipo==='tna') ? 'grid' : 'none';
+  calcular();
+}
+
+function fmt(n){
+  if(!isFinite(n)) n = 0;
+  return 'S/ ' + n.toLocaleString('es-PE', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function fmtPct(n){
+  return n.toLocaleString('es-PE', {minimumFractionDigits:2, maximumFractionDigits:2}) + '%';
+}
+
+// Convierte la tasa ingresada a Tasa Efectiva Mensual (TEM)
+function getTEM(){
+  const tasaInput = parseFloat(document.getElementById('tasa').value) || 0;
+  if(tasaTipo === 'tea'){
+    const tea = tasaInput/100;
+    return Math.pow(1+tea, 1/12) - 1;
+  } else {
+    const tna = tasaInput/100;
+    const m = parseInt(document.getElementById('capitalizacion').value) || 12;
+    const tep = tna/m; // tasa efectiva por periodo de capitalización
+    const teaEquivalente = Math.pow(1+tep, m) - 1;
+    return Math.pow(1+teaEquivalente, 1/12) - 1;
+  }
+}
+
+let lastSchedule = [];
+
+function calcular(){
+  const monto = parseFloat(document.getElementById('monto').value) || 0;
+  const plazo = parseInt(document.getElementById('plazo').value) || 0;
+  const tem = getTEM();
+  const desgTasa = (parseFloat(document.getElementById('desgravamen').value) || 0) / 100;
+  const comUnica = parseFloat(document.getElementById('comisionUnica').value) || 0;
+  const comMensual = parseFloat(document.getElementById('comisionMensual').value) || 0;
+  const incluirITF = document.getElementById('chkITF').checked;
+  const itfTasa = 0.00005; // 0.005%
+
+  if(monto<=0 || plazo<=0){ return; }
+
+  // Cuota fija de capital+interés (sistema francés), sin incluir seguros/comisiones
+  const cuotaBase = tem === 0 ? monto/plazo : monto * (tem * Math.pow(1+tem,plazo)) / (Math.pow(1+tem,plazo)-1);
+
+  let saldo = monto;
+  let totalInteres = 0, totalDesg = 0, totalComision = 0, totalCapital = 0, totalPagos = 0;
+  lastSchedule = [];
+
+  for(let i=1;i<=plazo;i++){
+    const interes = saldo * tem;
+    let capital = cuotaBase - interes;
+    if(i===plazo){ capital = saldo; } // ajusta el último para dejar el saldo en 0
+    const desg = saldo * desgTasa;
+    const comision = comMensual;
+    const cuotaTotal = capital + interes + desg + comision;
+    const saldoFinal = Math.max(saldo - capital, 0);
+
+    lastSchedule.push({n:i, saldoInicial:saldo, cuota:cuotaBase, interes, capital, desg, comision, total:cuotaTotal, saldoFinal});
+
+    totalInteres += interes;
+    totalDesg += desg;
+    totalComision += comision;
+    totalCapital += capital;
+    totalPagos += cuotaTotal;
+
+    saldo = saldoFinal;
+  }
+
+  const itf = incluirITF ? monto * itfTasa : 0;
+  totalComision += comUnica + itf;
+  const montoNeto = monto - comUnica - itf; // lo que realmente recibe el cliente
+  const costoTotal = totalInteres + totalDesg + totalComision;
+
+  // TCEA vía TIR (Newton-Raphson) sobre flujo: -montoNeto en t0, pagos mensuales en t1..tn
+  function flujoVAN(tasaMensual){
+    let van = -montoNeto;
+    lastSchedule.forEach(row=>{
+      van += row.total / Math.pow(1+tasaMensual, row.n);
+    });
+    return van;
+  }
+  let r = tem>0?tem:0.02, paso=0.0001;
+  for(let iter=0; iter<200; iter++){
+    const f = flujoVAN(r);
+    const fPrima = (flujoVAN(r+paso)-f)/paso;
+    if(fPrima===0) break;
+    const rNuevo = r - f/fPrima;
+    if(Math.abs(rNuevo-r) < 1e-9){ r = rNuevo; break; }
+    r = rNuevo;
+  }
+  const tceaAnual = (Math.pow(1+r,12)-1)*100;
+
+  // Render resultados
+  document.getElementById('cuotaFigure').innerHTML = fmt(cuotaBase) + ' <small>/ mes (base)</small>';
+  document.getElementById('tceaValue').textContent = isFinite(tceaAnual) ? fmtPct(tceaAnual) : '—';
+  document.getElementById('sumMonto').textContent = fmt(monto);
+  document.getElementById('sumInteres').textContent = fmt(totalInteres);
+  document.getElementById('sumDesg').textContent = fmt(totalDesg);
+  document.getElementById('sumComision').textContent = fmt(totalComision);
+  document.getElementById('sumTotal').textContent = fmt(monto + costoTotal);
+
+  const totalBarBase = totalCapital + totalInteres + totalDesg + totalComision;
+  document.getElementById('barCapital').style.width = (totalCapital/totalBarBase*100)+'%';
+  document.getElementById('barInteres').style.width = (totalInteres/totalBarBase*100)+'%';
+  document.getElementById('barSeguros').style.width = ((totalDesg+totalComision)/totalBarBase*100)+'%';
+
+  const tbody = document.getElementById('scheduleBody');
+  tbody.innerHTML = '';
+  lastSchedule.forEach(row=>{
+    const tr = document.createElement('tr');
+    if(row.n === plazo) tr.classList.add('final-row');
+    tr.innerHTML = `
+      <td>${row.n}</td>
+      <td>${fmt(row.saldoInicial)}</td>
+      <td>${fmt(row.cuota)}</td>
+      <td>${fmt(row.interes)}</td>
+      <td>${fmt(row.capital)}</td>
+      <td>${fmt(row.desg)}</td>
+      <td>${fmt(row.comision)}</td>
+      <td>${fmt(row.total)}</td>
+      <td>${fmt(row.saldoFinal)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function exportCSV(){
+  if(!lastSchedule.length) return;
+  let csv = 'N° Cuota,Saldo Inicial,Cuota Base,Interes,Capital,Desgravamen,Comision,Pago Total,Saldo Final\n';
+  lastSchedule.forEach(row=>{
+    csv += [row.n, row.saldoInicial.toFixed(2), row.cuota.toFixed(2), row.interes.toFixed(2),
+            row.capital.toFixed(2), row.desg.toFixed(2), row.comision.toFixed(2),
+            row.total.toFixed(2), row.saldoFinal.toFixed(2)].join(',') + '\n';
+  });
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'cronograma-prestamo-personal.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Listeners
+['monto','plazo','tasa','desgravamen','comisionUnica','comisionMensual'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', calcular);
+});
+document.getElementById('chkITF').addEventListener('change', calcular);
+document.getElementById('capitalizacion').addEventListener('change', calcular);
+
+calcular();
+</script>
+</body>
+</html>
