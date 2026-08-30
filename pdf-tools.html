@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Herramientas de PDF | EcoRealTools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  :root{
+    --bg:#F6F4EE; --panel:#FFFFFF; --ink:#17231F; --ink-soft:#566761;
+    --teal:#0B4F45; --teal-deep:#08332C; --teal-mist:#E7EFEC;
+    --gold:#B8873A; --gold-soft:#F1E3C8; --line:#DCD6C7; --red:#A23B2E; --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:'Inter', sans-serif; line-height:1.5;}
+  .wrap{max-width:980px; margin:0 auto; padding:32px 20px 80px;}
+  header.page{margin-bottom:28px; border-bottom:1px solid var(--line); padding-bottom:20px;}
+  .brand{font-family:'Fraunces', serif; font-weight:600; font-size:20px; color:var(--teal-deep);}
+  .brand span{color:var(--gold);}
+  h1{font-family:'Fraunces', serif; font-weight:600; font-size:clamp(28px,3.6vw,38px); margin:6px 0 6px; color:var(--teal-deep);}
+  .sub{color:var(--ink-soft); font-size:15px; max-width:65ch;}
+  .eyebrow{text-transform:uppercase; letter-spacing:.12em; font-size:11.5px; font-weight:600; color:var(--gold); margin-bottom:2px;}
+
+  .tabs{display:flex; gap:8px; margin-bottom:22px; flex-wrap:wrap;}
+  .tab-btn{
+    padding:12px 20px; border-radius:10px; border:1.5px solid var(--line); background:var(--panel);
+    font-family:'Fraunces', serif; font-weight:600; font-size:15px; color:var(--ink-soft); cursor:pointer;
+  }
+  .tab-btn.active{background:var(--teal-deep); border-color:var(--teal-deep); color:#fff;}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:26px;}
+
+  .dropzone{
+    border:2px dashed var(--line); border-radius:12px; padding:36px 20px; text-align:center;
+    cursor:pointer; transition:.15s; background:#FDFCF9;
+  }
+  .dropzone.drag{border-color:var(--teal); background:var(--teal-mist);}
+  .dropzone p{margin:0; color:var(--ink-soft); font-size:14px;}
+  .dropzone .big{font-family:'Fraunces', serif; font-weight:600; font-size:17px; color:var(--teal-deep); margin-bottom:6px;}
+  input[type=file]{display:none;}
+
+  .file-list{list-style:none; margin:18px 0 0; padding:0; display:grid; gap:10px;}
+  .file-item{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:12px 14px; border:1px solid var(--line); border-radius:9px; background:#FDFCF9;
+    font-size:13.5px;
+  }
+  .file-item .name{font-weight:600; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:340px;}
+  .file-item .meta{color:var(--ink-soft); font-family:'IBM Plex Mono'; font-size:12px;}
+  .file-actions{display:flex; gap:6px;}
+  .file-actions button{
+    border:1px solid var(--line); background:#fff; border-radius:6px; width:28px; height:28px;
+    cursor:pointer; font-size:13px; color:var(--ink-soft);
+  }
+  .file-actions button:hover{border-color:var(--teal); color:var(--teal);}
+  .file-actions button.danger:hover{border-color:var(--red); color:var(--red);}
+
+  label.field-label{display:block; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin:18px 0 6px; text-transform:uppercase; letter-spacing:.04em;}
+  input[type=text], input[type=number]{
+    width:100%; padding:11px 12px; border-radius:9px; border:1.5px solid var(--line);
+    background:#FDFCF9; font-family:'IBM Plex Mono', monospace; font-size:15px; color:var(--ink);
+  }
+  input[type=text]:focus, input[type=number]:focus{outline:none; border-color:var(--teal); background:#fff;}
+  .field-hint{font-size:12px; color:var(--ink-soft); margin-top:6px;}
+
+  .radio-cards{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:8px;}
+  @media (max-width:640px){ .radio-cards{grid-template-columns:1fr;} }
+  .radio-card{
+    border:1.5px solid var(--line); border-radius:10px; padding:14px; cursor:pointer; background:#FDFCF9;
+  }
+  .radio-card.active{border-color:var(--teal); background:var(--teal-mist);}
+  .radio-card b{display:block; font-family:'Fraunces', serif; font-size:14.5px; color:var(--teal-deep); margin-bottom:3px;}
+  .radio-card span{font-size:12px; color:var(--ink-soft);}
+
+  .btn-primary{
+    margin-top:22px; padding:13px 26px; border-radius:10px; border:none; background:var(--teal-deep);
+    color:#fff; font-family:'Fraunces', serif; font-weight:600; font-size:15px; cursor:pointer;
+  }
+  .btn-primary:hover{background:var(--teal);}
+  .btn-primary:disabled{background:var(--line); color:var(--ink-soft); cursor:not-allowed;}
+  .btn-secondary{
+    margin-top:22px; margin-left:10px; padding:13px 26px; border-radius:10px; border:1.5px solid var(--teal);
+    background:#fff; color:var(--teal); font-family:'Fraunces', serif; font-weight:600; font-size:15px; cursor:pointer;
+  }
+
+  .status{margin-top:16px; font-size:13.5px; color:var(--ink-soft);}
+  .status.ok{color:var(--teal);}
+  .status.err{color:var(--red);}
+  .progress-bar{height:8px; border-radius:4px; background:var(--teal-mist); overflow:hidden; margin-top:14px; display:none;}
+  .progress-bar div{height:100%; background:var(--teal); width:0%; transition:width .2s;}
+
+  .warn-box{
+    background:var(--gold-soft); border:1px solid #E0C793; border-radius:10px; padding:14px 16px;
+    font-size:13px; color:#5E4718; margin-top:16px;
+  }
+  .warn-box b{color:#4A3813;}
+
+  .result-box{
+    margin-top:20px; padding:18px; border-radius:10px; background:var(--teal-mist);
+    display:none; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  }
+  .result-box.show{display:flex;}
+  .result-box .info{font-size:13.5px; color:var(--teal-deep);}
+  .result-box .info b{font-family:'IBM Plex Mono';}
+  .btn-download{
+    padding:11px 22px; border-radius:9px; border:none; background:var(--gold); color:#fff;
+    font-weight:600; font-size:14px; cursor:pointer; text-decoration:none; display:inline-block;
+  }
+  .btn-download:hover{background:#a67932;}
+
+  .disclaimer{margin-top:24px; font-size:12px; color:var(--ink-soft); border-top:1px solid var(--line); padding-top:16px; max-width:82ch;}
+  .feedback{margin-top:40px; border-top:1px solid var(--line); padding-top:24px;}
+  .feedback iframe{width:100%; border:none; min-height:640px; border-radius:var(--radius); background:#fff;}
+  footer.page{margin-top:60px; padding-top:20px; border-top:1px solid var(--line); font-size:12.5px; color:var(--ink-soft); text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <div class="brand">Eco<span>Real</span>Tools</div>
+    <div class="eyebrow">Herramientas de PDF</div>
+    <h1>Unir, dividir y comprimir PDF</h1>
+    <p class="sub">Todo se procesa en tu navegador — tus archivos no se suben a ningún servidor, así que funciona sin conexión una vez cargada la página y no hay límite de privacidad.</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('unir')">Unir PDF</button>
+    <button class="tab-btn" onclick="switchTab('dividir')">Dividir / extraer</button>
+    <button class="tab-btn" onclick="switchTab('comprimir')">Comprimir</button>
+  </div>
+
+  <!-- ===== UNIR ===== -->
+  <div class="tab-panel active" id="panel-unir">
+    <div class="card">
+      <div class="dropzone" id="dz-unir">
+        <p class="big">Arrastra aquí varios PDF</p>
+        <p>o haz clic para seleccionarlos (puedes elegir varios a la vez)</p>
+        <input type="file" id="input-unir" accept="application/pdf" multiple>
+      </div>
+      <ul class="file-list" id="list-unir"></ul>
+      <p class="field-hint" id="hint-unir" style="display:none;">Se unirán en el orden mostrado — usa las flechas para reordenar.</p>
+      <button class="btn-primary" id="btn-unir" disabled onclick="unirPDFs()">Unir PDF</button>
+      <div class="progress-bar" id="prog-unir"><div></div></div>
+      <div class="status" id="status-unir"></div>
+      <div class="result-box" id="result-unir">
+        <div class="info">Listo — <b id="result-unir-size"></b></div>
+        <a class="btn-download" id="download-unir" download="documento-unido.pdf">Descargar PDF unido</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DIVIDIR ===== -->
+  <div class="tab-panel" id="panel-dividir">
+    <div class="card">
+      <div class="dropzone" id="dz-dividir">
+        <p class="big">Arrastra aquí un PDF</p>
+        <p>o haz clic para seleccionarlo</p>
+        <input type="file" id="input-dividir" accept="application/pdf">
+      </div>
+      <ul class="file-list" id="list-dividir"></ul>
+
+      <div id="dividir-opciones" style="display:none;">
+        <div class="radio-cards" id="dividir-modo">
+          <div class="radio-card active" data-modo="rango" onclick="setModoDividir('rango')">
+            <b>Extraer páginas</b>
+            <span>Un solo PDF con las páginas que elijas</span>
+          </div>
+          <div class="radio-card" data-modo="individual" onclick="setModoDividir('individual')">
+            <b>Separar todo</b>
+            <span>Un PDF por cada página, en un ZIP</span>
+          </div>
+        </div>
+
+        <div id="rango-input-wrap">
+          <label class="field-label" for="rango-paginas">Páginas a extraer</label>
+          <input type="text" id="rango-paginas" placeholder="Ej: 1-3, 5, 8-10">
+          <p class="field-hint">Este PDF tiene <b id="total-paginas">0</b> páginas. Sepáralas por comas y usa guiones para rangos.</p>
+        </div>
+
+        <button class="btn-primary" onclick="dividirPDF()">Procesar</button>
+      </div>
+      <div class="progress-bar" id="prog-dividir"><div></div></div>
+      <div class="status" id="status-dividir"></div>
+      <div class="result-box" id="result-dividir">
+        <div class="info">Listo — <b id="result-dividir-size"></b></div>
+        <a class="btn-download" id="download-dividir">Descargar</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== COMPRIMIR ===== -->
+  <div class="tab-panel" id="panel-comprimir">
+    <div class="card">
+      <div class="dropzone" id="dz-comprimir">
+        <p class="big">Arrastra aquí un PDF</p>
+        <p>o haz clic para seleccionarlo</p>
+        <input type="file" id="input-comprimir" accept="application/pdf">
+      </div>
+      <ul class="file-list" id="list-comprimir"></ul>
+
+      <div class="warn-box">
+        <b>Cómo funciona esta compresión:</b> convierte cada página en una imagen de menor calidad y rearma el PDF con esas imágenes — como hacen la mayoría de compresores gratuitos. Funciona muy bien para PDFs escaneados o con muchas fotos. <b>El texto deja de ser seleccionable/buscable</b> después de comprimir, así que evita usarlo en contratos u otros documentos donde necesites copiar o buscar texto.
+      </div>
+
+      <div id="comprimir-opciones" style="display:none;">
+        <label class="field-label">Nivel de compresión</label>
+        <div class="radio-cards" id="comprimir-nivel">
+          <div class="radio-card" data-nivel="alta" onclick="setNivelCompresion('alta')">
+            <b>Calidad alta</b>
+            <span>150 DPI · menor ahorro</span>
+          </div>
+          <div class="radio-card active" data-nivel="equilibrado" onclick="setNivelCompresion('equilibrado')">
+            <b>Equilibrado</b>
+            <span>120 DPI · buen balance</span>
+          </div>
+          <div class="radio-card" data-nivel="maxima" onclick="setNivelCompresion('maxima')">
+            <b>Máxima compresión</b>
+            <span>96 DPI · menor calidad</span>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="comprimirPDF()">Comprimir</button>
+      </div>
+      <div class="progress-bar" id="prog-comprimir"><div></div></div>
+      <div class="status" id="status-comprimir"></div>
+      <div class="result-box" id="result-comprimir">
+        <div class="info">Listo — <b id="result-comprimir-size"></b></div>
+        <a class="btn-download" id="download-comprimir" download="documento-comprimido.pdf">Descargar PDF comprimido</a>
+      </div>
+    </div>
+  </div>
+
+  <p class="disclaimer">
+    Todo el procesamiento ocurre localmente en tu navegador (JavaScript), usando las librerías de código abierto pdf-lib y pdf.js — ningún archivo se envía a un servidor externo. El tamaño y tiempo de procesamiento dependen de tu equipo y del tamaño del PDF original.
+  </p>
+
+  <div class="feedback">
+    <div class="eyebrow">¿Encontraste un error o falta algo?</div>
+    <p class="sub" style="margin-bottom:14px;">Cuéntanos qué mejorarías de esta herramienta.</p>
+    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeea6XP1jLKbVBgNMUh4dPPcqWkJ3EeTANlZMIXAmnz7ELyng/viewform?embedded=true" title="Formulario de sugerencias"></iframe>
+  </div>
+
+  <footer class="page">EcoRealTools — herramientas financieras para el día a día · Perú</footer>
+</div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const { PDFDocument } = PDFLib;
+
+function switchTab(tab){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add('active');
+  document.getElementById('panel-'+tab).classList.add('active');
+}
+
+function fmtBytes(bytes){
+  if(bytes < 1024) return bytes + ' B';
+  if(bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/(1024*1024)).toFixed(2) + ' MB';
+}
+
+function setupDropzone(dzId, inputId, onFiles, multiple){
+  const dz = document.getElementById(dzId);
+  const input = document.getElementById(inputId);
+  dz.addEventListener('click', ()=>input.click());
+  input.addEventListener('change', ()=>{ if(input.files.length) onFiles(Array.from(input.files)); });
+  ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev, e=>{ e.preventDefault(); dz.classList.add('drag'); }));
+  ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev, e=>{ e.preventDefault(); dz.classList.remove('drag'); }));
+  dz.addEventListener('drop', e=>{
+    const files = Array.from(e.dataTransfer.files).filter(f=>f.type==='application/pdf');
+    if(files.length) onFiles(multiple ? files : [files[0]]);
+  });
+}
+
+/* ========================= UNIR ========================= */
+let filesUnir = [];
+
+setupDropzone('dz-unir','input-unir', (files)=>{
+  filesUnir = filesUnir.concat(files);
+  renderListUnir();
+}, true);
+
+function renderListUnir(){
+  const list = document.getElementById('list-unir');
+  list.innerHTML = '';
+  filesUnir.forEach((f, i)=>{
+    const li = document.createElement('li');
+    li.className = 'file-item';
+    li.innerHTML = `
+      <span class="name">${f.name}</span>
+      <span class="meta">${fmtBytes(f.size)}</span>
+      <span class="file-actions">
+        <button onclick="moverUnir(${i},-1)" ${i===0?'disabled':''}>↑</button>
+        <button onclick="moverUnir(${i},1)" ${i===filesUnir.length-1?'disabled':''}>↓</button>
+        <button class="danger" onclick="quitarUnir(${i})">✕</button>
+      </span>`;
+    list.appendChild(li);
+  });
+  document.getElementById('hint-unir').style.display = filesUnir.length ? 'block' : 'none';
+  document.getElementById('btn-unir').disabled = filesUnir.length < 2;
+}
+function moverUnir(i, dir){
+  const j = i+dir;
+  if(j<0 || j>=filesUnir.length) return;
+  [filesUnir[i], filesUnir[j]] = [filesUnir[j], filesUnir[i]];
+  renderListUnir();
+}
+function quitarUnir(i){ filesUnir.splice(i,1); renderListUnir(); }
+
+async function unirPDFs(){
+  const statusEl = document.getElementById('status-unir');
+  const prog = document.getElementById('prog-unir');
+  prog.style.display='block'; prog.firstElementChild.style.width='10%';
+  statusEl.textContent = 'Uniendo archivos...'; statusEl.className='status';
+  document.getElementById('result-unir').classList.remove('show');
+  try{
+    const merged = await PDFDocument.create();
+    for(let i=0;i<filesUnir.length;i++){
+      const bytes = await filesUnir[i].arrayBuffer();
+      const src = await PDFDocument.load(bytes);
+      const pages = await merged.copyPages(src, src.getPageIndices());
+      pages.forEach(p=>merged.addPage(p));
+      prog.firstElementChild.style.width = (10 + (i+1)/filesUnir.length*80) + '%';
+    }
+    const outBytes = await merged.save();
+    prog.firstElementChild.style.width='100%';
+    const blob = new Blob([outBytes], {type:'application/pdf'});
+    const url = URL.createObjectURL(blob);
+    document.getElementById('download-unir').href = url;
+    document.getElementById('result-unir-size').textContent = fmtBytes(blob.size) + ' · ' + filesUnir.length + ' archivos unidos';
+    document.getElementById('result-unir').classList.add('show');
+    statusEl.textContent = 'Listo.'; statusEl.className='status ok';
+  }catch(err){
+    statusEl.textContent = 'Ocurrió un error: ' + err.message; statusEl.className='status err';
+  }
+  setTimeout(()=>prog.style.display='none', 600);
+}
+
+/* ========================= DIVIDIR ========================= */
+let fileDividir = null, pdfDividirDoc = null, modoDividir = 'rango';
+
+setupDropzone('dz-dividir','input-dividir', async (files)=>{
+  fileDividir = files[0];
+  document.getElementById('list-dividir').innerHTML = `
+    <li class="file-item"><span class="name">${fileDividir.name}</span><span class="meta">${fmtBytes(fileDividir.size)}</span></li>`;
+  const bytes = await fileDividir.arrayBuffer();
+  pdfDividirDoc = await PDFDocument.load(bytes);
+  document.getElementById('total-paginas').textContent = pdfDividirDoc.getPageCount();
+  document.getElementById('dividir-opciones').style.display = 'block';
+}, false);
+
+function setModoDividir(modo){
+  modoDividir = modo;
+  document.querySelectorAll('#dividir-modo .radio-card').forEach(c=>c.classList.toggle('active', c.dataset.modo===modo));
+  document.getElementById('rango-input-wrap').style.display = (modo==='rango') ? 'block' : 'none';
+}
+
+function parseRangoPaginas(input, totalPaginas){
+  const indices = new Set();
+  input.split(',').forEach(part=>{
+    part = part.trim();
+    if(!part) return;
+    if(part.includes('-')){
+      const [a,b] = part.split('-').map(n=>parseInt(n.trim()));
+      if(!isNaN(a) && !isNaN(b)){
+        for(let p=a; p<=b; p++){ if(p>=1 && p<=totalPaginas) indices.add(p-1); }
+      }
+    } else {
+      const n = parseInt(part);
+      if(!isNaN(n) && n>=1 && n<=totalPaginas) indices.add(n-1);
+    }
+  });
+  return Array.from(indices).sort((a,b)=>a-b);
+}
+
+async function dividirPDF(){
+  const statusEl = document.getElementById('status-dividir');
+  const prog = document.getElementById('prog-dividir');
+  document.getElementById('result-dividir').classList.remove('show');
+  if(!pdfDividirDoc){ statusEl.textContent='Primero carga un PDF.'; statusEl.className='status err'; return; }
+  prog.style.display='block'; prog.firstElementChild.style.width='15%';
+  statusEl.textContent = 'Procesando...'; statusEl.className='status';
+
+  try{
+    const totalPaginas = pdfDividirDoc.getPageCount();
+    const bytesOriginal = await fileDividir.arrayBuffer();
+
+    if(modoDividir === 'rango'){
+      const indices = parseRangoPaginas(document.getElementById('rango-paginas').value, totalPaginas);
+      if(!indices.length){ statusEl.textContent='Ingresa al menos una página válida.'; statusEl.className='status err'; prog.style.display='none'; return; }
+      const src = await PDFDocument.load(bytesOriginal);
+      const out = await PDFDocument.create();
+      const pages = await out.copyPages(src, indices);
+      pages.forEach(p=>out.addPage(p));
+      prog.firstElementChild.style.width='90%';
+      const outBytes = await out.save();
+      const blob = new Blob([outBytes], {type:'application/pdf'});
+      const url = URL.createObjectURL(blob);
+      const dl = document.getElementById('download-dividir');
+      dl.href = url; dl.download = 'paginas-extraidas.pdf'; dl.textContent = 'Descargar PDF';
+      document.getElementById('result-dividir-size').textContent = fmtBytes(blob.size) + ' · ' + indices.length + ' páginas';
+      document.getElementById('result-dividir').classList.add('show');
+    } else {
+      const zip = new JSZip();
+      for(let i=0;i<totalPaginas;i++){
+        const src = await PDFDocument.load(bytesOriginal);
+        const out = await PDFDocument.create();
+        const [page] = await out.copyPages(src, [i]);
+        out.addPage(page);
+        const outBytes = await out.save();
+        zip.file(`pagina-${i+1}.pdf`, outBytes);
+        prog.firstElementChild.style.width = (15 + (i+1)/totalPaginas*75) + '%';
+      }
+      const zipBlob = await zip.generateAsync({type:'blob'});
+      const url = URL.createObjectURL(zipBlob);
+      const dl = document.getElementById('download-dividir');
+      dl.href = url; dl.download = 'paginas-separadas.zip'; dl.textContent = 'Descargar ZIP';
+      document.getElementById('result-dividir-size').textContent = fmtBytes(zipBlob.size) + ' · ' + totalPaginas + ' archivos';
+      document.getElementById('result-dividir').classList.add('show');
+    }
+    prog.firstElementChild.style.width='100%';
+    statusEl.textContent = 'Listo.'; statusEl.className='status ok';
+  }catch(err){
+    statusEl.textContent = 'Ocurrió un error: ' + err.message; statusEl.className='status err';
+  }
+  setTimeout(()=>prog.style.display='none', 600);
+}
+
+/* ========================= COMPRIMIR ========================= */
+let fileComprimir = null, nivelCompresion = 'equilibrado';
+const NIVELES = {
+  alta:       { dpi:150, calidad:0.80 },
+  equilibrado:{ dpi:120, calidad:0.60 },
+  maxima:     { dpi:96,  calidad:0.40 }
+};
+
+setupDropzone('dz-comprimir','input-comprimir', (files)=>{
+  fileComprimir = files[0];
+  document.getElementById('list-comprimir').innerHTML = `
+    <li class="file-item"><span class="name">${fileComprimir.name}</span><span class="meta">${fmtBytes(fileComprimir.size)}</span></li>`;
+  document.getElementById('comprimir-opciones').style.display = 'block';
+}, false);
+
+function setNivelCompresion(nivel){
+  nivelCompresion = nivel;
+  document.querySelectorAll('#comprimir-nivel .radio-card').forEach(c=>c.classList.toggle('active', c.dataset.nivel===nivel));
+}
+
+async function comprimirPDF(){
+  const statusEl = document.getElementById('status-comprimir');
+  const prog = document.getElementById('prog-comprimir');
+  document.getElementById('result-comprimir').classList.remove('show');
+  if(!fileComprimir){ statusEl.textContent='Primero carga un PDF.'; statusEl.className='status err'; return; }
+  prog.style.display='block'; prog.firstElementChild.style.width='5%';
+  statusEl.textContent = 'Renderizando páginas...'; statusEl.className='status';
+
+  try{
+    const { dpi, calidad } = NIVELES[nivelCompresion];
+    const scale = dpi/72;
+    const bytesOriginal = await fileComprimir.arrayBuffer();
+    const loadingTask = pdfjsLib.getDocument({data: bytesOriginal});
+    const pdf = await loadingTask.promise;
+    const numPages = pdf.numPages;
+
+    const outDoc = await PDFDocument.create();
+
+    for(let i=1;i<=numPages;i++){
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({scale});
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      const ctx = canvas.getContext('2d');
+      await page.render({canvasContext: ctx, viewport}).promise;
+
+      const jpegDataUrl = canvas.toDataURL('image/jpeg', calidad);
+      const jpegBytes = await (await fetch(jpegDataUrl)).arrayBuffer();
+      const jpegImage = await outDoc.embedJpg(jpegBytes);
+
+      const ptWidth = viewport.width * 72/(dpi);
+      const ptHeight = viewport.height * 72/(dpi);
+      const pdfPage = outDoc.addPage([ptWidth, ptHeight]);
+      pdfPage.drawImage(jpegImage, {x:0, y:0, width:ptWidth, height:ptHeight});
+
+      prog.firstElementChild.style.width = (5 + (i/numPages)*85) + '%';
+      statusEl.textContent = `Procesando página ${i} de ${numPages}...`;
+    }
+
+    const outBytes = await outDoc.save();
+    prog.firstElementChild.style.width='100%';
+    const blob = new Blob([outBytes], {type:'application/pdf'});
+    const url = URL.createObjectURL(blob);
+    document.getElementById('download-comprimir').href = url;
+
+    const reduccion = ((1 - blob.size/fileComprimir.size) * 100).toFixed(0);
+    const reduccionTxt = reduccion > 0 ? `${reduccion}% más liviano` : 'sin reducción significativa';
+    document.getElementById('result-comprimir-size').textContent =
+      `${fmtBytes(fileComprimir.size)} → ${fmtBytes(blob.size)} (${reduccionTxt})`;
+    document.getElementById('result-comprimir').classList.add('show');
+    statusEl.textContent = 'Listo.'; statusEl.className='status ok';
+  }catch(err){
+    statusEl.textContent = 'Ocurrió un error: ' + err.message; statusEl.className='status err';
+  }
+  setTimeout(()=>prog.style.display='none', 600);
+}
+</script>
+</body>
+</html>
