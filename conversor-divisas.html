@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conversor de Divisas | EcoRealTools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F4EE; --panel:#FFFFFF; --ink:#17231F; --ink-soft:#566761;
+    --teal:#0B4F45; --teal-deep:#08332C; --teal-mist:#E7EFEC;
+    --gold:#B8873A; --gold-soft:#F1E3C8; --line:#DCD6C7; --red:#A23B2E; --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:'Inter', sans-serif; line-height:1.5;}
+  .wrap{max-width:760px; margin:0 auto; padding:32px 20px 80px;}
+  header.page{margin-bottom:28px; border-bottom:1px solid var(--line); padding-bottom:20px;}
+  .brand{font-family:'Fraunces', serif; font-weight:600; font-size:20px; color:var(--teal-deep);}
+  .brand span{color:var(--gold);}
+  h1{font-family:'Fraunces', serif; font-weight:600; font-size:clamp(28px,3.6vw,38px); margin:6px 0 6px; color:var(--teal-deep);}
+  .sub{color:var(--ink-soft); font-size:15px; max-width:60ch;}
+  .eyebrow{text-transform:uppercase; letter-spacing:.12em; font-size:11.5px; font-weight:600; color:var(--gold); margin-bottom:2px;}
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:28px;}
+
+  .convert-row{display:grid; grid-template-columns:1fr auto 1fr; gap:14px; align-items:end;}
+  @media (max-width:560px){ .convert-row{grid-template-columns:1fr; } .swap-btn{justify-self:center; transform:rotate(90deg);} }
+
+  .currency-field label{display:block; font-size:12px; font-weight:600; color:var(--ink-soft); margin-bottom:8px; text-transform:uppercase; letter-spacing:.04em;}
+  .currency-box{
+    border:1.5px solid var(--line); border-radius:12px; background:#FDFCF9; padding:14px 16px;
+  }
+  .currency-box:focus-within{border-color:var(--teal); background:#fff;}
+  .currency-box input[type=number]{
+    width:100%; border:none; background:none; outline:none;
+    font-family:'IBM Plex Mono', monospace; font-size:22px; font-weight:600; color:var(--teal-deep);
+    padding:0; margin-bottom:10px;
+  }
+  .currency-select-wrap{position:relative;}
+  .currency-select-btn{
+    display:flex; align-items:center; gap:8px; background:none; border:none; cursor:pointer;
+    font-family:'Inter'; font-weight:600; font-size:14px; color:var(--ink); padding:0;
+  }
+  .currency-select-btn .flag{font-size:18px;}
+  .currency-select-btn svg{width:10px; height:10px; opacity:.5;}
+
+  .currency-dropdown{
+    position:absolute; top:calc(100% + 8px); left:0; width:280px; max-height:320px; overflow-y:auto;
+    background:#fff; border:1px solid var(--line); border-radius:10px; box-shadow:0 14px 32px rgba(0,0,0,.12);
+    display:none; z-index:20;
+  }
+  .currency-dropdown.show{display:block;}
+  .currency-dropdown input{
+    width:100%; padding:10px 14px; border:none; border-bottom:1px solid var(--line);
+    font-family:'Inter'; font-size:13.5px; outline:none; position:sticky; top:0; background:#fff;
+  }
+  .currency-dropdown .opt{padding:9px 14px; font-size:13.5px; cursor:pointer; display:flex; justify-content:space-between; gap:10px;}
+  .currency-dropdown .opt:hover{background:var(--teal-mist);}
+  .currency-dropdown .opt .code{font-family:'IBM Plex Mono'; color:var(--ink-soft); font-size:12px;}
+
+  .swap-btn{
+    width:42px; height:42px; border-radius:50%; border:1.5px solid var(--line); background:#fff;
+    color:var(--teal); cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center;
+    margin-bottom:14px;
+  }
+  .swap-btn:hover{border-color:var(--teal); background:var(--teal-mist);}
+
+  .rate-line{
+    margin-top:22px; padding-top:18px; border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px;
+  }
+  .rate-line .rate-text{font-family:'IBM Plex Mono', monospace; font-size:14px; color:var(--teal-deep); font-weight:600;}
+  .rate-line .updated{font-size:11.5px; color:var(--ink-soft);}
+
+  .quick-table{margin-top:26px;}
+  .quick-table .eyebrow{margin-bottom:10px;}
+  table{width:100%; border-collapse:collapse; font-family:'IBM Plex Mono', monospace; font-size:13px;}
+  thead th{background:var(--teal-mist); color:var(--teal-deep); text-align:right; padding:9px 12px; font-family:'Inter'; font-weight:700; font-size:10.5px; text-transform:uppercase;}
+  thead th:first-child, tbody td:first-child{text-align:left;}
+  tbody td{padding:8px 12px; text-align:right; border-top:1px solid var(--line);}
+  tbody tr:nth-child(even){background:#FBFAF6;}
+
+  .status{margin-top:14px; font-size:13px; color:var(--ink-soft);}
+  .status.err{color:var(--red);}
+
+  .disclaimer{margin-top:22px; font-size:12px; color:var(--ink-soft); border-top:1px solid var(--line); padding-top:16px; max-width:80ch;}
+  .feedback{margin-top:40px; border-top:1px solid var(--line); padding-top:24px;}
+  .feedback iframe{width:100%; border:none; min-height:640px; border-radius:var(--radius); background:#fff;}
+  footer.page{margin-top:60px; padding-top:20px; border-top:1px solid var(--line); font-size:12.5px; color:var(--ink-soft); text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <div class="brand">Eco<span>Real</span>Tools</div>
+    <div class="eyebrow">Conversor de divisas</div>
+    <h1>Convierte entre monedas</h1>
+    <p class="sub">Tipo de cambio actualizado a diario, con soles peruanos y 160+ monedas disponibles.</p>
+  </header>
+
+  <div class="card">
+    <div class="convert-row">
+      <div class="currency-field">
+        <label>De</label>
+        <div class="currency-box">
+          <input type="number" id="amountFrom" value="1" min="0" step="any">
+          <div class="currency-select-wrap" id="wrapFrom">
+            <button type="button" class="currency-select-btn" id="btnFrom">
+              <span class="flag" id="flagFrom">🇵🇪</span>
+              <span id="labelFrom">PEN — Sol peruano</span>
+              <svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="currency-dropdown" id="dropdownFrom">
+              <input type="text" placeholder="Buscar moneda..." id="searchFrom">
+              <div id="listFrom"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="swap-btn" id="swapBtn" title="Invertir">⇄</button>
+
+      <div class="currency-field">
+        <label>A</label>
+        <div class="currency-box">
+          <input type="number" id="amountTo" value="0" min="0" step="any">
+          <div class="currency-select-wrap" id="wrapTo">
+            <button type="button" class="currency-select-btn" id="btnTo">
+              <span class="flag" id="flagTo">🇺🇸</span>
+              <span id="labelTo">USD — Dólar estadounidense</span>
+              <svg viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="currency-dropdown" id="dropdownTo">
+              <input type="text" placeholder="Buscar moneda..." id="searchTo">
+              <div id="listTo"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rate-line">
+      <span class="rate-text" id="rateText">Cargando tipo de cambio...</span>
+      <span class="updated" id="updatedText"></span>
+    </div>
+    <div class="status" id="statusMsg"></div>
+  </div>
+
+  <div class="card quick-table" id="quickTableCard" style="margin-top:20px;">
+    <div class="eyebrow">Referencia rápida</div>
+    <p class="sub" style="margin-bottom:14px;">1 <b id="quickBaseLabel">PEN</b> equivale a:</p>
+    <table>
+      <thead><tr><th>Moneda</th><th>Valor</th></tr></thead>
+      <tbody id="quickTableBody"></tbody>
+    </table>
+  </div>
+
+  <p class="disclaimer">
+    Fuente: ExchangeRate-API (open access), actualizado una vez al día — no refleja movimientos intradía del mercado, así que si necesitas el tipo de cambio exacto para una operación importante (transferencia bancaria, cambio en casa de cambio), verifica siempre con tu banco o casa de cambio antes de decidir. Tasas por ExchangeRate-API (exchangerate-api.com).
+  </p>
+
+  <div class="feedback">
+    <div class="eyebrow">¿Encontraste un error o falta algo?</div>
+    <p class="sub" style="margin-bottom:14px;">Cuéntanos qué mejorarías de esta herramienta.</p>
+    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSd9LHl-ZGWVaXTu2XMBt9dHEm103Q5Uu9OmEf5Oi1R2fMMNBg/viewform?embedded=true" title="Formulario de sugerencias"></iframe>
+  </div>
+
+  <footer class="page">EcoRealTools — herramientas financieras para el día a día · Perú</footer>
+</div>
+
+<script>
+// Monedas prioritarias (aparecen primero en la lista, con bandera)
+const PRIORIDAD = [
+  {code:'PEN', flag:'🇵🇪', nombre:'Sol peruano'},
+  {code:'USD', flag:'🇺🇸', nombre:'Dólar estadounidense'},
+  {code:'EUR', flag:'🇪🇺', nombre:'Euro'},
+  {code:'MXN', flag:'🇲🇽', nombre:'Peso mexicano'},
+  {code:'COP', flag:'🇨🇴', nombre:'Peso colombiano'},
+  {code:'CLP', flag:'🇨🇱', nombre:'Peso chileno'},
+  {code:'ARS', flag:'🇦🇷', nombre:'Peso argentino'},
+  {code:'BRL', flag:'🇧🇷', nombre:'Real brasileño'},
+  {code:'GBP', flag:'🇬🇧', nombre:'Libra esterlina'},
+  {code:'CAD', flag:'🇨🇦', nombre:'Dólar canadiense'},
+  {code:'CHF', flag:'🇨🇭', nombre:'Franco suizo'},
+  {code:'JPY', flag:'🇯🇵', nombre:'Yen japonés'},
+  {code:'CNY', flag:'🇨🇳', nombre:'Yuan chino'},
+];
+const NOMBRE_POR_CODIGO = {};
+PRIORIDAD.forEach(c=>NOMBRE_POR_CODIGO[c.code] = c.nombre);
+
+let monedaFrom = 'PEN';
+let monedaTo = 'USD';
+let ratesCache = {}; // { base: { rates:{...}, updated:'...' } }
+let todasLasMonedas = []; // lista de códigos disponibles según la última respuesta de la API
+
+async function obtenerTasas(base){
+  if(ratesCache[base]) return ratesCache[base];
+  const statusMsg = document.getElementById('statusMsg');
+  statusMsg.textContent = '';
+  try{
+    const res = await fetch(`https://open.er-api.com/v6/latest/${base}`);
+    const data = await res.json();
+    if(data.result !== 'success') throw new Error('La API no devolvió datos válidos.');
+    ratesCache[base] = { rates: data.rates, updated: data.time_last_update_utc };
+    todasLasMonedas = Object.keys(data.rates).sort();
+    return ratesCache[base];
+  }catch(err){
+    statusMsg.textContent = 'No se pudo obtener el tipo de cambio en este momento. Intenta de nuevo en unos segundos.';
+    statusMsg.className = 'status err';
+    return null;
+  }
+}
+
+function nombreMoneda(code){
+  return NOMBRE_POR_CODIGO[code] || code;
+}
+
+async function actualizarConversion(origen){
+  const data = await obtenerTasas(monedaFrom);
+  if(!data) return;
+  const tasa = data.rates[monedaTo];
+  if(tasa === undefined){
+    document.getElementById('statusMsg').textContent = `No hay tasa disponible para ${monedaTo}.`;
+    document.getElementById('statusMsg').className = 'status err';
+    return;
+  }
+  document.getElementById('statusMsg').textContent = '';
+
+  const amountFrom = document.getElementById('amountFrom');
+  const amountTo = document.getElementById('amountTo');
+
+  if(origen === 'to'){
+    const valTo = parseFloat(amountTo.value) || 0;
+    amountFrom.value = tasa ? (valTo / tasa).toFixed(4).replace(/\.?0+$/,'') : 0;
+  } else {
+    const valFrom = parseFloat(amountFrom.value) || 0;
+    amountTo.value = (valFrom * tasa).toFixed(4).replace(/\.?0+$/,'');
+  }
+
+  document.getElementById('rateText').textContent =
+    `1 ${monedaFrom} = ${tasa.toLocaleString('es-PE',{maximumFractionDigits:6})} ${monedaTo}`;
+
+  const fecha = new Date(data.updated);
+  document.getElementById('updatedText').textContent =
+    'Actualizado: ' + fecha.toLocaleDateString('es-PE', {day:'numeric', month:'short', year:'numeric'});
+
+  renderTablaRapida(data);
+}
+
+function renderTablaRapida(data){
+  document.getElementById('quickBaseLabel').textContent = monedaFrom;
+  const destacadas = PRIORIDAD.filter(c=>c.code !== monedaFrom).slice(0, 8);
+  const tbody = document.getElementById('quickTableBody');
+  tbody.innerHTML = '';
+  destacadas.forEach(c=>{
+    const tasa = data.rates[c.code];
+    if(tasa === undefined) return;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${c.flag} ${c.code} — ${c.nombre}</td><td>${tasa.toLocaleString('es-PE',{maximumFractionDigits:4})}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ===== Selector de moneda (dropdown con búsqueda) =====
+function construirListaOpciones(container, onSelect, excluir){
+  container.innerHTML = '';
+  const codigosOrdenados = [
+    ...PRIORIDAD.map(c=>c.code),
+    ...todasLasMonedas.filter(c=>!PRIORIDAD.some(p=>p.code===c))
+  ];
+  codigosOrdenados.forEach(code=>{
+    if(code === excluir) return;
+    const div = document.createElement('div');
+    div.className = 'opt';
+    div.innerHTML = `<span>${nombreMoneda(code)}</span><span class="code">${code}</span>`;
+    div.addEventListener('click', ()=>onSelect(code));
+    container.appendChild(div);
+  });
+}
+
+function setupSelector(btnId, dropdownId, searchId, listId, labelId, flagId, wrapId, getExcluir, onSelect){
+  const btn = document.getElementById(btnId);
+  const dropdown = document.getElementById(dropdownId);
+  const search = document.getElementById(searchId);
+  const list = document.getElementById(listId);
+
+  btn.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    document.querySelectorAll('.currency-dropdown').forEach(d=>{ if(d!==dropdown) d.classList.remove('show'); });
+    dropdown.classList.toggle('show');
+    if(dropdown.classList.contains('show')){
+      search.value = '';
+      construirListaOpciones(list, (code)=>{ onSelect(code); dropdown.classList.remove('show'); }, getExcluir());
+      search.focus();
+    }
+  });
+
+  search.addEventListener('input', ()=>{
+    const q = search.value.trim().toLowerCase();
+    list.querySelectorAll('.opt').forEach(opt=>{
+      const texto = opt.textContent.toLowerCase();
+      opt.style.display = texto.includes(q) ? 'flex' : 'none';
+    });
+  });
+
+  document.addEventListener('click', (e)=>{
+    if(!e.target.closest(`#${wrapId}`)) dropdown.classList.remove('show');
+  });
+}
+
+function actualizarEtiqueta(labelId, flagId, code){
+  const info = PRIORIDAD.find(c=>c.code===code);
+  document.getElementById(labelId).textContent = `${code} — ${nombreMoneda(code)}`;
+  document.getElementById(flagId).textContent = info ? info.flag : '💱';
+}
+
+setupSelector('btnFrom','dropdownFrom','searchFrom','listFrom','labelFrom','flagFrom','wrapFrom',
+  ()=>monedaTo, (code)=>{ monedaFrom = code; actualizarEtiqueta('labelFrom','flagFrom',code); actualizarConversion('from'); });
+
+setupSelector('btnTo','dropdownTo','searchTo','listTo','labelTo','flagTo','wrapTo',
+  ()=>monedaFrom, (code)=>{ monedaTo = code; actualizarEtiqueta('labelTo','flagTo',code); actualizarConversion('from'); });
+
+document.getElementById('amountFrom').addEventListener('input', ()=>actualizarConversion('from'));
+document.getElementById('amountTo').addEventListener('input', ()=>actualizarConversion('to'));
+
+document.getElementById('swapBtn').addEventListener('click', ()=>{
+  [monedaFrom, monedaTo] = [monedaTo, monedaFrom];
+  actualizarEtiqueta('labelFrom','flagFrom',monedaFrom);
+  actualizarEtiqueta('labelTo','flagTo',monedaTo);
+  actualizarConversion('from');
+});
+
+// Carga inicial
+actualizarConversion('from');
+</script>
+</body>
+</html>
