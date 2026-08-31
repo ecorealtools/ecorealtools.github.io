@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Datos Económicos Históricos | EcoRealTools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#F6F4EE; --panel:#FFFFFF; --ink:#17231F; --ink-soft:#566761;
+    --teal:#0B4F45; --teal-deep:#08332C; --teal-mist:#E7EFEC;
+    --gold:#B8873A; --gold-soft:#F1E3C8; --line:#DCD6C7; --red:#A23B2E; --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:'Inter', sans-serif; line-height:1.5;}
+  .wrap{max-width:1080px; margin:0 auto; padding:32px 20px 80px;}
+  header.page{margin-bottom:28px; border-bottom:1px solid var(--line); padding-bottom:20px;}
+  .brand{font-family:'Fraunces', serif; font-weight:600; font-size:20px; color:var(--teal-deep);}
+  .brand span{color:var(--gold);}
+  h1{font-family:'Fraunces', serif; font-weight:600; font-size:clamp(28px,3.6vw,38px); margin:6px 0 6px; color:var(--teal-deep);}
+  .sub{color:var(--ink-soft); font-size:15px; max-width:68ch;}
+  .eyebrow{text-transform:uppercase; letter-spacing:.12em; font-size:11.5px; font-weight:600; color:var(--gold); margin-bottom:2px;}
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:26px; margin-bottom:22px;}
+
+  label.field-label{display:block; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin:0 0 8px; text-transform:uppercase; letter-spacing:.04em;}
+  select{
+    width:100%; padding:11px 12px; border-radius:9px; border:1.5px solid var(--line);
+    background:#FDFCF9; font-family:'IBM Plex Mono', monospace; font-size:14.5px; color:var(--ink);
+  }
+  select:focus{outline:none; border-color:var(--teal); background:#fff;}
+
+  .country-picker{margin-top:18px;}
+  .country-search{
+    width:100%; padding:10px 12px; border-radius:9px; border:1.5px solid var(--line);
+    background:#FDFCF9; font-family:'Inter'; font-size:14px; margin-bottom:10px;
+  }
+  .country-search:focus{outline:none; border-color:var(--teal); background:#fff;}
+  .country-chips{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;}
+  .chip{
+    display:flex; align-items:center; gap:6px; padding:6px 10px 6px 12px; border-radius:20px;
+    background:var(--teal-deep); color:#fff; font-size:13px; font-weight:600;
+  }
+  .chip button{background:none; border:none; color:#fff; cursor:pointer; font-size:13px; opacity:.75; padding:0;}
+  .chip button:hover{opacity:1;}
+  .country-list{
+    max-height:220px; overflow-y:auto; border:1px solid var(--line); border-radius:9px; background:#fff;
+    display:none;
+  }
+  .country-list.show{display:block;}
+  .country-list div{padding:9px 14px; font-size:13.5px; cursor:pointer;}
+  .country-list div:hover{background:var(--teal-mist);}
+  .country-list div.disabled{opacity:.35; pointer-events:none;}
+  .field-hint{font-size:12px; color:var(--ink-soft); margin-top:6px;}
+
+  .warn-inline{
+    display:none; background:var(--gold-soft); border:1px solid #E0C793; border-radius:9px;
+    padding:10px 14px; font-size:12.5px; color:#5E4718; margin-top:14px;
+  }
+  .warn-inline.show{display:block;}
+
+  .chart-wrap{position:relative; height:380px; margin-top:8px;}
+
+  table{width:100%; border-collapse:collapse; font-family:'IBM Plex Mono', monospace; font-size:12.8px; margin-top:18px;}
+  thead th{background:var(--teal-mist); color:var(--teal-deep); text-align:right; padding:10px 12px; font-family:'Inter'; font-weight:700; font-size:11px; text-transform:uppercase;}
+  thead th:first-child, tbody td:first-child{text-align:left;}
+  tbody td{padding:8px 12px; text-align:right; border-top:1px solid var(--line);}
+  tbody tr:nth-child(even){background:#FBFAF6;}
+  .table-scroll{overflow-x:auto; overflow-y:auto; max-height:420px; border:1px solid var(--line); border-radius:12px;}
+
+  .empty-state{
+    text-align:center; padding:60px 20px; color:var(--ink-soft);
+  }
+  .empty-state b{display:block; font-family:'Fraunces', serif; color:var(--teal-deep); font-size:17px; margin-bottom:8px;}
+  .empty-state code{background:var(--teal-mist); padding:2px 6px; border-radius:4px; font-family:'IBM Plex Mono';}
+
+  .disclaimer{margin-top:20px; font-size:12px; color:var(--ink-soft); border-top:1px solid var(--line); padding-top:16px; max-width:82ch;}
+  .feedback{margin-top:40px; border-top:1px solid var(--line); padding-top:24px;}
+  .feedback iframe{width:100%; border:none; min-height:640px; border-radius:var(--radius); background:#fff;}
+  footer.page{margin-top:60px; padding-top:20px; border-top:1px solid var(--line); font-size:12.5px; color:var(--ink-soft); text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <div class="brand">Eco<span>Real</span>Tools</div>
+    <div class="eyebrow">Datos económicos</div>
+    <h1>Cifras económicas por país, en el tiempo</h1>
+    <p class="sub">PBI, comercio exterior, inflación, reservas, inversión, deuda y más — compara hasta 3 países a la vez, con datos históricos del Banco Mundial y el FMI.</p>
+  </header>
+
+  <div class="card">
+    <label class="field-label" for="selectVariable">Variable</label>
+    <select id="selectVariable"></select>
+    <div class="warn-inline" id="warnNoComparable">
+      Esta variable está en la moneda local de cada país, así que no es comparable directamente entre países en el mismo gráfico — úsala para ver la evolución de un solo país a la vez.
+    </div>
+
+    <div class="country-picker">
+      <label class="field-label">Países a comparar (máximo 3)</label>
+      <div class="country-chips" id="countryChips"></div>
+      <input type="text" class="country-search" id="countrySearch" placeholder="Buscar país... (ej: Perú, Chile, México)" autocomplete="off">
+      <div class="country-list" id="countryList"></div>
+      <p class="field-hint">Empieza a escribir para buscar y hacer clic en un país de la lista.</p>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="chart-wrap"><canvas id="chart"></canvas></div>
+    <div class="table-scroll">
+      <table id="dataTable"></table>
+    </div>
+  </div>
+
+  <div class="card" id="emptyCard">
+    <div class="empty-state">
+      <b>Todavía no hay datos cargados</b>
+      Esta herramienta lee los archivos <code>data/*.json</code> que genera el script <code>actualizar_datos.py</code>.<br>
+      Corre el script una vez, sube la carpeta <code>data/</code> junto a este archivo, y los datos aparecerán aquí automáticamente.
+    </div>
+  </div>
+
+  <p class="disclaimer">
+    Fuentes: Banco Mundial (World Bank Open Data) para PBI, exportaciones, importaciones, inflación, reservas, inversión, IED y tipo de cambio; Fondo Monetario Internacional (World Economic Outlook, IMF DataMapper) para deuda del gobierno general como % del PBI — el Banco Mundial tiene huecos serios en ese indicador específico, por eso se usa una fuente distinta solo para esa variable. Los datos se actualizan manualmente cada cierto tiempo, así que pueden no reflejar el año más reciente para todos los países. "Reservas internacionales brutas" no es exactamente el mismo indicador que el RIN publicado por el BCRP para Perú, aunque son comparables en magnitud.
+  </p>
+
+  <div class="feedback">
+    <div class="eyebrow">¿Encontraste un error o falta algo?</div>
+    <p class="sub" style="margin-bottom:14px;">Cuéntanos qué mejorarías de esta herramienta.</p>
+    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLScHb1ZHzztiw-09XpfdFQOySMFirE_kCYeHi7tIrK0yxJk4dA/viewform?embedded=true" title="Formulario de sugerencias"></iframe>
+  </div>
+
+  <footer class="page">EcoRealTools — herramientas financieras para el día a día · Perú</footer>
+</div>
+
+<script>
+const VARIABLES = [
+  {archivo:'pbi',           etiqueta:'PBI (US$ corrientes)'},
+  {archivo:'exportaciones', etiqueta:'Exportaciones de bienes y servicios (US$)'},
+  {archivo:'importaciones', etiqueta:'Importaciones de bienes y servicios (US$)'},
+  {archivo:'inflacion',     etiqueta:'Inflación anual (%)'},
+  {archivo:'reservas',      etiqueta:'Reservas internacionales brutas (US$)'},
+  {archivo:'inversion',     etiqueta:'Formación bruta de capital (% del PBI)'},
+  {archivo:'ied',           etiqueta:'Inversión extranjera directa (US$)'},
+  {archivo:'tipo_cambio',   etiqueta:'Tipo de cambio (moneda local por US$)', noComparable:true},
+  {archivo:'deuda_pbi',     etiqueta:'Deuda del gobierno general (% del PBI)'},
+];
+const COLORES = ['#B8873A', '#0B4F45', '#A23B2E'];
+
+let datasetActual = null;
+let paisesSeleccionados = []; // [{code, nombre}]
+let chartInstance = null;
+
+const selectVariable = document.getElementById('selectVariable');
+VARIABLES.forEach(v=>{
+  const opt = document.createElement('option');
+  opt.value = v.archivo; opt.textContent = v.etiqueta;
+  selectVariable.appendChild(opt);
+});
+
+async function cargarVariable(archivo){
+  const varInfo = VARIABLES.find(v=>v.archivo===archivo);
+  document.getElementById('warnNoComparable').classList.toggle('show', !!(varInfo && varInfo.noComparable));
+  try{
+    const res = await fetch(`data/${archivo}.json`);
+    if(!res.ok) throw new Error('no encontrado');
+    datasetActual = await res.json();
+    document.getElementById('emptyCard').style.display = 'none';
+    render();
+  }catch(err){
+    datasetActual = null;
+    document.getElementById('resultCard').style.display = 'none';
+    document.getElementById('emptyCard').style.display = 'block';
+  }
+}
+
+selectVariable.addEventListener('change', ()=>cargarVariable(selectVariable.value));
+
+// ===== Selector de países =====
+const countrySearch = document.getElementById('countrySearch');
+const countryList = document.getElementById('countryList');
+const countryChips = document.getElementById('countryChips');
+
+let catalogoPaises = {}; // { code: nombre }
+fetch('data/paises.json').then(r=>r.ok?r.json():{}).then(data=>{ catalogoPaises = data; }).catch(()=>{});
+
+countrySearch.addEventListener('input', ()=>{
+  const q = countrySearch.value.trim().toLowerCase();
+  countryList.innerHTML = '';
+  if(!q){ countryList.classList.remove('show'); return; }
+  const coincidencias = Object.entries(catalogoPaises)
+    .filter(([code, nombre])=>nombre.toLowerCase().includes(q))
+    .slice(0, 30);
+  if(!coincidencias.length){ countryList.classList.remove('show'); return; }
+  coincidencias.forEach(([code, nombre])=>{
+    const yaElegido = paisesSeleccionados.some(p=>p.code===code);
+    const div = document.createElement('div');
+    div.textContent = nombre + (yaElegido ? ' ✓' : '');
+    if(yaElegido) div.classList.add('disabled');
+    div.addEventListener('click', ()=>agregarPais(code, nombre));
+    countryList.appendChild(div);
+  });
+  countryList.classList.add('show');
+});
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('.country-picker')) countryList.classList.remove('show');
+});
+
+function agregarPais(code, nombre){
+  if(paisesSeleccionados.length >= 3) return;
+  if(paisesSeleccionados.some(p=>p.code===code)) return;
+  paisesSeleccionados.push({code, nombre});
+  countrySearch.value = '';
+  countryList.classList.remove('show');
+  renderChips();
+  render();
+}
+function quitarPais(code){
+  paisesSeleccionados = paisesSeleccionados.filter(p=>p.code!==code);
+  renderChips();
+  render();
+}
+function renderChips(){
+  countryChips.innerHTML = '';
+  paisesSeleccionados.forEach(p=>{
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.innerHTML = `${p.nombre} <button aria-label="Quitar">✕</button>`;
+    chip.querySelector('button').addEventListener('click', ()=>quitarPais(p.code));
+    countryChips.appendChild(chip);
+  });
+}
+
+function fmtNumero(n){
+  if(n===null || n===undefined) return '—';
+  if(Math.abs(n) >= 1e9) return (n/1e9).toLocaleString('es-PE',{maximumFractionDigits:2}) + ' mil M';
+  if(Math.abs(n) >= 1e6) return (n/1e6).toLocaleString('es-PE',{maximumFractionDigits:2}) + ' M';
+  return n.toLocaleString('es-PE',{maximumFractionDigits:2});
+}
+
+function render(){
+  if(!datasetActual || !paisesSeleccionados.length){
+    document.getElementById('resultCard').style.display = 'none';
+    return;
+  }
+  document.getElementById('resultCard').style.display = 'block';
+
+  // Recolectar todos los años presentes entre los países seleccionados
+  const añosSet = new Set();
+  paisesSeleccionados.forEach(p=>{
+    const info = datasetActual.paises[p.code];
+    if(info) Object.keys(info.valores).forEach(a=>añosSet.add(a));
+  });
+  const años = Array.from(añosSet).sort();
+
+  // Gráfico
+  const datasets = paisesSeleccionados.map((p, i)=>{
+    const info = datasetActual.paises[p.code];
+    return {
+      label: p.nombre,
+      data: años.map(a => info && info.valores[a] !== undefined ? info.valores[a] : null),
+      borderColor: COLORES[i],
+      backgroundColor: COLORES[i],
+      spanGaps: true,
+      tension: 0.25,
+      pointRadius: 2,
+    };
+  });
+
+  if(chartInstance) chartInstance.destroy();
+  const ctx = document.getElementById('chart').getContext('2d');
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: { labels: años, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins:{ legend:{ position:'bottom', labels:{ font:{family:"'Inter'"} } } },
+      scales:{
+        y:{ ticks:{ callback: v=>fmtNumero(v), font:{family:"'IBM Plex Mono'", size:11} } },
+        x:{ ticks:{ font:{family:"'IBM Plex Mono'", size:11}, maxRotation:0, autoSkip:true, maxTicksLimit:14 } }
+      }
+    }
+  });
+
+  // Tabla
+  const table = document.getElementById('dataTable');
+  let thead = '<thead><tr><th>Año</th>' + paisesSeleccionados.map(p=>`<th>${p.nombre}</th>`).join('') + '</tr></thead>';
+  let tbody = '<tbody>';
+  años.slice().reverse().forEach(a=>{
+    tbody += `<tr><td>${a}</td>` + paisesSeleccionados.map(p=>{
+      const info = datasetActual.paises[p.code];
+      const val = info ? info.valores[a] : undefined;
+      return `<td>${val!==undefined ? fmtNumero(val) : '—'}</td>`;
+    }).join('') + '</tr>';
+  });
+  tbody += '</tbody>';
+  table.innerHTML = thead + tbody;
+}
+
+// Carga inicial
+cargarVariable(selectVariable.value);
+</script>
+</body>
+</html>
