@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control de Gastos | EcoRealTools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.4/tesseract.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#F6F4EE; --panel:#FFFFFF; --ink:#17231F; --ink-soft:#566761;
+    --teal:#0B4F45; --teal-deep:#08332C; --teal-mist:#E7EFEC;
+    --gold:#B8873A; --gold-soft:#F1E3C8; --line:#DCD6C7; --red:#A23B2E; --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:'Inter', sans-serif; line-height:1.5;}
+  a{ color:inherit; }
+  .wrap{max-width:1100px; margin:0 auto; padding:32px 20px 80px;}
+  .page-head{margin-bottom:24px; border-bottom:1px solid var(--line); padding-bottom:20px;}
+  .brand{font-family:'Fraunces', serif; font-weight:600; font-size:20px; color:var(--teal-deep);}
+  .brand span{color:var(--gold);}
+  h1{font-family:'Fraunces', serif; font-weight:600; font-size:clamp(26px,3.4vw,36px); margin:6px 0 6px; color:var(--teal-deep);}
+  .sub{color:var(--ink-soft); font-size:15px; max-width:70ch;}
+  .eyebrow{text-transform:uppercase; letter-spacing:.12em; font-size:11.5px; font-weight:600; color:var(--gold); margin-bottom:2px;}
+
+  /* ===== Tabs ===== */
+  .tabs{display:flex; gap:4px; margin-bottom:22px; border-bottom:1px solid var(--line); flex-wrap:wrap;}
+  .tab-btn{
+    background:none; border:none; cursor:pointer; font-family:'Inter', sans-serif;
+    font-size:14.5px; font-weight:600; color:var(--ink-soft); padding:12px 18px;
+    border-bottom:2px solid transparent; margin-bottom:-1px;
+  }
+  .tab-btn.active{ color:var(--teal-deep); border-bottom-color:var(--teal); }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:26px; margin-bottom:22px;}
+  .card h2{font-family:'Fraunces', serif; font-size:19px; margin:0 0 4px; color:var(--teal-deep);}
+  .card .card-sub{font-size:13.5px; color:var(--ink-soft); margin:0 0 18px;}
+
+  label.field-label{display:block; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin:0 0 6px; text-transform:uppercase; letter-spacing:.04em;}
+  input[type=text], input[type=number], input[type=date], select, textarea{
+    width:100%; padding:10px 12px; border-radius:9px; border:1.5px solid var(--line);
+    background:#FDFCF9; font-family:'Inter', sans-serif; font-size:14.5px; color:var(--ink);
+  }
+  input:focus, select:focus, textarea:focus{outline:none; border-color:var(--teal); background:#fff;}
+  .field-row{display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:14px; margin-bottom:14px;}
+
+  .btn{
+    display:inline-flex; align-items:center; gap:8px; padding:11px 20px; border-radius:9px;
+    border:none; cursor:pointer; font-family:'Inter', sans-serif; font-weight:600; font-size:14.5px;
+  }
+  .btn-primary{background:var(--teal); color:#fff;}
+  .btn-primary:hover{background:var(--teal-deep);}
+  .btn-secondary{background:var(--teal-mist); color:var(--teal-deep);}
+  .btn-secondary:hover{background:#dbe8e2;}
+  .btn-ghost{background:none; color:var(--ink-soft); border:1.5px solid var(--line);}
+  .btn-ghost:hover{border-color:var(--teal); color:var(--teal-deep);}
+  .btn-danger{background:none; color:var(--red); border:1.5px solid rgba(162,59,46,0.3);}
+  .btn-danger:hover{background:rgba(162,59,46,0.06);}
+  .btn:disabled{opacity:.5; cursor:not-allowed;}
+  .btn-sm{padding:6px 12px; font-size:13px;}
+
+  .dropzone{
+    border:2px dashed var(--line); border-radius:12px; padding:34px 20px; text-align:center;
+    background:#FDFCF9; cursor:pointer; transition:border-color .15s ease;
+  }
+  .dropzone.drag{ border-color:var(--teal); background:var(--teal-mist); }
+  .dropzone b{display:block; color:var(--teal-deep); font-family:'Fraunces', serif; font-size:16px; margin-bottom:4px;}
+  .dropzone p{color:var(--ink-soft); font-size:13px; margin:0;}
+
+  .preview-list{display:flex; flex-wrap:wrap; gap:10px; margin-top:16px;}
+  .preview-item{position:relative; width:88px; height:88px; border-radius:9px; overflow:hidden; border:1px solid var(--line);}
+  .preview-item img{width:100%; height:100%; object-fit:cover;}
+  .preview-item .rm{
+    position:absolute; top:3px; right:3px; background:rgba(8,51,44,0.8); color:#fff; border:none;
+    width:20px; height:20px; border-radius:50%; cursor:pointer; font-size:12px; line-height:1;
+  }
+
+  .progress-bar{height:6px; border-radius:4px; background:var(--teal-mist); overflow:hidden; margin-top:14px; display:none;}
+  .progress-bar.show{display:block;}
+  .progress-fill{height:100%; background:var(--teal); width:0%; transition:width .2s ease;}
+  .progress-label{font-size:12.5px; color:var(--ink-soft); margin-top:6px;}
+
+  .receipt-result{margin-top:24px; padding-top:22px; border-top:1px solid var(--line);}
+  .raw-ocr{
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; white-space:pre-wrap;
+    background:var(--teal-mist); border-radius:8px; padding:12px; max-height:180px; overflow-y:auto; color:var(--ink-soft);
+  }
+  details summary{cursor:pointer; font-size:12.5px; color:var(--teal); font-weight:600; margin-bottom:8px;}
+
+  table.items-table{width:100%; border-collapse:collapse; font-size:13.5px; margin-top:14px;}
+  table.items-table th{
+    background:var(--teal-mist); color:var(--teal-deep); text-align:left; padding:8px 10px;
+    font-size:11px; text-transform:uppercase; font-weight:700;
+  }
+  table.items-table td{padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:middle;}
+  table.items-table input, table.items-table select{padding:6px 8px; font-size:13px;}
+  table.items-table .col-desc{min-width:180px;}
+  table.items-table .col-num{width:80px;}
+  table.items-table .col-unit{width:80px;}
+  table.items-table .col-cat{width:150px;}
+  table.items-table .col-action{width:36px; text-align:center;}
+  .rm-row{background:none; border:none; color:var(--red); cursor:pointer; font-size:15px;}
+
+  .badge{
+    display:inline-block; padding:2px 9px; border-radius:20px; font-size:11.5px; font-weight:600;
+    background:var(--gold-soft); color:#5E4718;
+  }
+  .badge-new{background:var(--teal-mist); color:var(--teal-deep);}
+
+  /* ===== Historial ===== */
+  .filters{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:18px; align-items:flex-end;}
+  .filters .field{min-width:160px;}
+  .hist-table-wrap{overflow-x:auto; border:1px solid var(--line); border-radius:12px;}
+  table.hist-table{width:100%; border-collapse:collapse; font-size:13.5px; min-width:720px;}
+  table.hist-table thead th{
+    background:var(--teal-mist); color:var(--teal-deep); text-align:left; padding:10px 12px;
+    font-size:11px; text-transform:uppercase; font-weight:700;
+  }
+  table.hist-table tbody td{padding:9px 12px; border-top:1px solid var(--line);}
+  table.hist-table tbody tr:hover{background:#FBFAF6;}
+  .amount{font-family:'IBM Plex Mono', monospace; font-weight:600;}
+  .empty-hint{text-align:center; padding:50px 20px; color:var(--ink-soft);}
+  .empty-hint b{display:block; font-family:'Fraunces', serif; color:var(--teal-deep); font-size:17px; margin-bottom:6px;}
+
+  /* ===== Stats ===== */
+  .stat-cards{display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:16px; margin-bottom:22px;}
+  .stat-card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px;}
+  .stat-card .label{font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); margin-bottom:6px;}
+  .stat-card .value{font-family:'Fraunces', serif; font-size:26px; color:var(--teal-deep); font-weight:600;}
+  .chart-wrap{position:relative; height:320px;}
+  .charts-grid{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
+  @media (max-width:800px){ .charts-grid{grid-template-columns:1fr;} }
+
+  .toast{
+    position:fixed; bottom:24px; right:24px; background:var(--teal-deep); color:#fff; padding:12px 20px;
+    border-radius:9px; font-size:14px; font-weight:500; box-shadow:0 8px 24px rgba(0,0,0,0.2);
+    opacity:0; transform:translateY(10px); transition:all .25s ease; pointer-events:none; z-index:100;
+  }
+  .toast.show{opacity:1; transform:translateY(0);}
+
+  footer.page{margin-top:50px; padding-top:20px; border-top:1px solid var(--line); font-size:12.5px; color:var(--ink-soft); text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page-head">
+    <div class="brand">Eco<span>Real</span>Tools</div>
+    <div class="eyebrow">Control de gastos</div>
+    <h1>Registra y entiende en qué se te va la plata</h1>
+    <p class="sub">Escanea boletas de mercado/supermercado o anota gastos manuales (servicios, combustible, etc.). Todo se guarda en este navegador — usa "Exportar respaldo" seguido para no perder tus datos.</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="tab-scan">Escanear boleta</button>
+    <button class="tab-btn" data-tab="tab-manual">Registro manual</button>
+    <button class="tab-btn" data-tab="tab-hist">Historial</button>
+    <button class="tab-btn" data-tab="tab-stats">Estadísticas</button>
+    <button class="tab-btn" data-tab="tab-data">Respaldo</button>
+  </div>
+
+  <!-- ===== TAB: ESCANEAR BOLETA ===== -->
+  <section class="tab-panel active" id="tab-scan">
+    <div class="card">
+      <h2>Sube una o varias boletas</h2>
+      <p class="card-sub">Funciona mejor con boletas electrónicas impresas y claras. El texto detectado siempre queda editable antes de guardar.</p>
+
+      <div class="dropzone" id="dropzone">
+        <b>Arrastra tus fotos aquí, o haz clic para elegir</b>
+        <p>JPG, PNG · puedes subir varias a la vez</p>
+        <input type="file" id="fileInput" accept="image/*" multiple style="display:none;">
+      </div>
+
+      <div class="preview-list" id="previewList"></div>
+
+      <div style="margin-top:16px; display:flex; gap:10px; align-items:center;">
+        <button class="btn btn-primary" id="btnProcesar" disabled>Procesar boletas</button>
+        <span class="progress-label" id="progressLabel"></span>
+      </div>
+      <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <div id="receiptResults"></div>
+  </section>
+
+  <!-- ===== TAB: REGISTRO MANUAL ===== -->
+  <section class="tab-panel" id="tab-manual">
+    <div class="card">
+      <h2>Gasto manual</h2>
+      <p class="card-sub">Para mercado de barrio sin boleta, servicios, combustible, o cualquier gasto suelto.</p>
+
+      <div class="field-row">
+        <div>
+          <label class="field-label">Fecha</label>
+          <input type="date" id="manFecha">
+        </div>
+        <div>
+          <label class="field-label">Categoría</label>
+          <select id="manCategoria"></select>
+        </div>
+        <div>
+          <label class="field-label">Monto total (S/)</label>
+          <input type="number" id="manMonto" step="0.01" placeholder="0.00">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div>
+          <label class="field-label">Comercio / descripción</label>
+          <input type="text" id="manDesc" placeholder="Ej: Mercado Central, Cineplanet, Repsol...">
+        </div>
+        <div>
+          <label class="field-label">Cantidad (opcional)</label>
+          <input type="number" id="manCantidad" step="0.01" placeholder="Ej: 1.5">
+        </div>
+        <div>
+          <label class="field-label">Unidad</label>
+          <select id="manUnidad">
+            <option value="">—</option>
+            <option value="kg">kg</option>
+            <option value="g">g</option>
+            <option value="l">litro</option>
+            <option value="unidad">unidad</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div style="grid-column:1/-1;">
+          <label class="field-label">Notas (opcional)</label>
+          <input type="text" id="manNotas" placeholder="Cualquier detalle adicional">
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="btnGuardarManual">Guardar gasto</button>
+    </div>
+  </section>
+
+  <!-- ===== TAB: HISTORIAL ===== -->
+  <section class="tab-panel" id="tab-hist">
+    <div class="card">
+      <div class="filters">
+        <div class="field">
+          <label class="field-label">Desde</label>
+          <input type="date" id="filtroDesde">
+        </div>
+        <div class="field">
+          <label class="field-label">Hasta</label>
+          <input type="date" id="filtroHasta">
+        </div>
+        <div class="field">
+          <label class="field-label">Categoría</label>
+          <select id="filtroCategoria"><option value="">Todas</option></select>
+        </div>
+        <div class="field">
+          <label class="field-label">Buscar</label>
+          <input type="text" id="filtroTexto" placeholder="Comercio o producto...">
+        </div>
+        <button class="btn btn-ghost btn-sm" id="btnLimpiarFiltros">Limpiar filtros</button>
+      </div>
+
+      <div class="hist-table-wrap">
+        <table class="hist-table">
+          <thead><tr><th>Fecha</th><th>Categoría</th><th>Comercio / detalle</th><th>Cant.</th><th>Monto</th><th></th></tr></thead>
+          <tbody id="histBody"></tbody>
+        </table>
+      </div>
+      <div id="histEmpty" class="empty-hint" style="display:none;">
+        <b>Todavía no hay gastos registrados</b>
+        Escanea una boleta o agrega un gasto manual para empezar.
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TAB: ESTADÍSTICAS ===== -->
+  <section class="tab-panel" id="tab-stats">
+    <div class="stat-cards" id="statCards"></div>
+    <div class="card">
+      <div class="charts-grid">
+        <div>
+          <h2>Gasto por categoría</h2>
+          <div class="chart-wrap"><canvas id="chartCategoria"></canvas></div>
+        </div>
+        <div>
+          <h2>Gasto por mes</h2>
+          <div class="chart-wrap"><canvas id="chartMes"></canvas></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Top productos / comercios</h2>
+      <div class="chart-wrap" style="height:360px;"><canvas id="chartTop"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ===== TAB: RESPALDO ===== -->
+  <section class="tab-panel" id="tab-data">
+    <div class="card">
+      <h2>Exportar / importar respaldo</h2>
+      <p class="card-sub">Tus datos viven en este navegador. Si cambias de computadora, formateas, o borras datos de navegación, los pierdes — exporta un respaldo seguido y guárdalo en tu Drive o donde prefieras.</p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-primary" id="btnExportar">Exportar respaldo (.json)</button>
+        <button class="btn btn-secondary" id="btnImportarBtn">Importar respaldo</button>
+        <input type="file" id="btnImportar" accept="application/json" style="display:none;">
+        <button class="btn btn-danger" id="btnBorrarTodo">Borrar todos los datos</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="page">EcoRealTools — herramientas financieras para el día a día · Perú</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   ESTADO Y ALMACENAMIENTO
+   ========================================================= */
+const LS_GASTOS = 'gastos_registros_v1';
+const LS_DICC   = 'gastos_diccionario_v1';
+
+const CATEGORIAS = [
+  'Mercado / Supermercado', 'Servicios (luz, agua, internet)', 'Combustible',
+  'Transporte', 'Salud', 'Restaurantes', 'Entretenimiento', 'Educación', 'Otros'
+];
+
+function cargarGastos(){
+  try{ return JSON.parse(localStorage.getItem(LS_GASTOS)) || []; }catch(e){ return []; }
+}
+function guardarGastos(lista){
+  localStorage.setItem(LS_GASTOS, JSON.stringify(lista));
+}
+function cargarDiccionario(){
+  try{ return JSON.parse(localStorage.getItem(LS_DICC)) || {}; }catch(e){ return {}; }
+}
+function guardarDiccionario(dicc){
+  localStorage.setItem(LS_DICC, JSON.stringify(dicc));
+}
+
+let GASTOS = cargarGastos();
+let DICC = cargarDiccionario();
+
+function uid(){ return 'g_' + Date.now() + '_' + Math.random().toString(36).slice(2,8); }
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+/* =========================================================
+   TABS
+   ========================================================= */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab === 'tab-hist') renderHistorial();
+    if(btn.dataset.tab === 'tab-stats') renderStats();
+  });
+});
+
+/* =========================================================
+   SELECTS DE CATEGORÍA (llenado inicial)
+   ========================================================= */
+function llenarSelectCategorias(select, incluirTodas){
+  select.innerHTML = '';
+  CATEGORIAS.forEach(c=>{
+    const opt = document.createElement('option');
+    opt.value = c; opt.textContent = c;
+    select.appendChild(opt);
+  });
+}
+llenarSelectCategorias(document.getElementById('manCategoria'));
+
+const filtroCategoria = document.getElementById('filtroCategoria');
+CATEGORIAS.forEach(c=>{
+  const opt = document.createElement('option');
+  opt.value = c; opt.textContent = c;
+  filtroCategoria.appendChild(opt);
+});
+
+/* Fecha por defecto: hoy */
+document.getElementById('manFecha').value = new Date().toISOString().slice(0,10);
+
+/* =========================================================
+   REGISTRO MANUAL
+   ========================================================= */
+document.getElementById('btnGuardarManual').addEventListener('click', ()=>{
+  const fecha = document.getElementById('manFecha').value;
+  const categoria = document.getElementById('manCategoria').value;
+  const monto = parseFloat(document.getElementById('manMonto').value);
+  const desc = document.getElementById('manDesc').value.trim();
+  const cantidad = document.getElementById('manCantidad').value;
+  const unidad = document.getElementById('manUnidad').value;
+  const notas = document.getElementById('manNotas').value.trim();
+
+  if(!fecha || !monto || monto <= 0){
+    toast('Falta la fecha o el monto');
+    return;
+  }
+
+  GASTOS.push({
+    id: uid(), fecha, categoria, comercio: desc || '(sin descripción)',
+    monto, fuente: 'manual', notas,
+    items: cantidad ? [{ descripcion: desc || '(sin descripción)', cantidad: parseFloat(cantidad), unidad, precio: monto, categoria }] : []
+  });
+  guardarGastos(GASTOS);
+
+  if(desc){
+    const key = desc.trim().toLowerCase();
+    DICC[key] = { categoria, unidad: unidad || '' };
+    guardarDiccionario(DICC);
+  }
+
+  toast('Gasto guardado');
+  document.getElementById('manMonto').value = '';
+  document.getElementById('manDesc').value = '';
+  document.getElementById('manCantidad').value = '';
+  document.getElementById('manNotas').value = '';
+});
+
+/* =========================================================
+   ESCANEAR BOLETA — carga de imágenes
+   ========================================================= */
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const previewList = document.getElementById('previewList');
+let archivosPendientes = [];
+
+dropzone.addEventListener('click', ()=>fileInput.click());
+dropzone.addEventListener('dragover', e=>{ e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', ()=> dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', e=>{
+  e.preventDefault(); dropzone.classList.remove('drag');
+  agregarArchivos(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', ()=> agregarArchivos(fileInput.files));
+
+function agregarArchivos(fileList){
+  Array.from(fileList).forEach(f=>{
+    if(!f.type.startsWith('image/')) return;
+    archivosPendientes.push(f);
+  });
+  renderPreviews();
+}
+
+function renderPreviews(){
+  previewList.innerHTML = '';
+  archivosPendientes.forEach((f, i)=>{
+    const div = document.createElement('div');
+    div.className = 'preview-item';
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(f);
+    const rm = document.createElement('button');
+    rm.className = 'rm'; rm.textContent = '✕';
+    rm.addEventListener('click', ()=>{ archivosPendientes.splice(i,1); renderPreviews(); });
+    div.appendChild(img); div.appendChild(rm);
+    previewList.appendChild(div);
+  });
+  document.getElementById('btnProcesar').disabled = archivosPendientes.length === 0;
+}
+
+/* =========================================================
+   OCR con Tesseract.js
+   ========================================================= */
+document.getElementById('btnProcesar').addEventListener('click', async ()=>{
+  const btn = document.getElementById('btnProcesar');
+  btn.disabled = true;
+  const progressBar = document.getElementById('progressBar');
+  const progressFill = document.getElementById('progressFill');
+  const progressLabel = document.getElementById('progressLabel');
+  progressBar.classList.add('show');
+
+  const resultsWrap = document.getElementById('receiptResults');
+
+  for(let i=0; i<archivosPendientes.length; i++){
+    const file = archivosPendientes[i];
+    progressLabel.textContent = `Leyendo boleta ${i+1} de ${archivosPendientes.length}...`;
+    progressFill.style.width = '10%';
+
+    let rawText = '';
+    try{
+      const result = await Tesseract.recognize(file, 'spa', {
+        logger: m=>{
+          if(m.status === 'recognizing text'){
+            progressFill.style.width = Math.round(10 + m.progress*85) + '%';
+          }
+        }
+      });
+      rawText = result.data.text;
+    }catch(err){
+      toast('No se pudo leer una de las imágenes');
+      continue;
+    }
+
+    progressFill.style.width = '100%';
+    const parsed = parsearBoleta(rawText);
+    resultsWrap.prepend(crearBloqueResultado(parsed, rawText, URL.createObjectURL(file)));
+  }
+
+  progressLabel.textContent = 'Listo. Revisa los datos antes de guardar.';
+  setTimeout(()=>{ progressBar.classList.remove('show'); progressFill.style.width='0%'; }, 800);
+
+  archivosPendientes = [];
+  renderPreviews();
+});
+
+/* ---------- Parser heurístico de boletas peruanas ---------- */
+function parsearBoleta(text){
+  const lineas = text.split('\n').map(l=>l.trim()).filter(Boolean);
+
+  // Fecha (dd/mm/yyyy o dd-mm-yyyy)
+  let fecha = '';
+  const mFecha = text.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/);
+  if(mFecha){
+    fecha = `${mFecha[3]}-${mFecha[2]}-${mFecha[1]}`;
+  }
+
+  // RUC
+  let ruc = '';
+  const mRuc = text.match(/RUC[:\s]*([0-9]{11})/i);
+  if(mRuc) ruc = mRuc[1];
+
+  // Comercio: primera línea "razonable" (letras, no muy corta, no es la palabra RUC/BOLETA)
+  let comercio = '';
+  for(const l of lineas){
+    if(l.length > 4 && /[A-Za-zÁÉÍÓÚÑáéíóúñ]/.test(l) && !/^(RUC|BOLETA|FACTURA|TICKET)/i.test(l)){
+      comercio = l; break;
+    }
+  }
+
+  // Total: busca la línea con "TOTAL" que no sea "SUBTOTAL" primero, tomando el último candidato
+  let total = null;
+  const candidatosTotal = [];
+  lineas.forEach(l=>{
+    if(/^TOTAL\b/i.test(l) || /\bIMPORTE TOTAL\b/i.test(l)){
+      const m = l.match(/(\d+[.,]\d{2})/);
+      if(m) candidatosTotal.push(parseFloat(m[1].replace(',','.')));
+    }
+  });
+  if(candidatosTotal.length) total = candidatosTotal[candidatosTotal.length - 1];
+  if(total === null){
+    // fallback: el número más grande con formato de precio en todo el texto
+    const todos = [...text.matchAll(/(\d+[.,]\d{2})/g)].map(m=>parseFloat(m[1].replace(',','.')));
+    if(todos.length) total = Math.max(...todos);
+  }
+
+  // Ítems: líneas con 2+ espacios entre columnas, terminando en un precio
+  const items = [];
+  lineas.forEach(l=>{
+    const partes = l.split(/\s{2,}/).map(p=>p.trim()).filter(Boolean);
+    if(partes.length >= 2){
+      const ultima = partes[partes.length - 1];
+      const mPrecio = ultima.match(/^(\d+[.,]\d{2})$/);
+      if(mPrecio && partes[0].length > 2 && !/^total$/i.test(partes[0])){
+        const precio = parseFloat(mPrecio[1].replace(',','.'));
+        // busca cantidad+unidad en las partes intermedias
+        let cantidad = '', unidad = '';
+        for(let i=1; i<partes.length-1; i++){
+          const mCant = partes[i].match(/(\d+[.,]?\d*)\s*(KG|GR|UN|UND|LT|L)?/i);
+          if(mCant && mCant[1]){ cantidad = mCant[1].replace(',','.'); unidad = (mCant[2]||'').toLowerCase(); break; }
+        }
+        items.push({ descripcion: partes[0], cantidad, unidad, precio });
+      }
+    }
+  });
+
+  return { fecha, ruc, comercio, total, items };
+}
+
+/* ---------- Construye el bloque de revisión/edición ---------- */
+let contadorBloques = 0;
+function crearBloqueResultado(parsed, rawText, imgUrl){
+  contadorBloques++;
+  const blockId = 'rb_' + contadorBloques;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'card receipt-result';
+  wrap.id = blockId;
+
+  const catSugerida = parsed.comercio && DICC[parsed.comercio.trim().toLowerCase()]
+    ? DICC[parsed.comercio.trim().toLowerCase()].categoria
+    : 'Mercado / Supermercado';
+
+  wrap.innerHTML = `
+    <div style="display:flex; gap:18px; flex-wrap:wrap;">
+      <img src="${imgUrl}" style="width:110px; height:140px; object-fit:cover; border-radius:8px; border:1px solid var(--line);">
+      <div style="flex:1; min-width:260px;">
+        <div class="field-row">
+          <div>
+            <label class="field-label">Fecha</label>
+            <input type="date" class="f-fecha" value="${parsed.fecha || ''}">
+          </div>
+          <div>
+            <label class="field-label">Comercio</label>
+            <input type="text" class="f-comercio" value="${(parsed.comercio||'').replace(/"/g,'&quot;')}">
+          </div>
+          <div>
+            <label class="field-label">Total (S/)</label>
+            <input type="number" step="0.01" class="f-total" value="${parsed.total ?? ''}">
+          </div>
+        </div>
+        <div class="field-row">
+          <div>
+            <label class="field-label">Categoría general</label>
+            <select class="f-categoria"></select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <details style="margin-top:14px;">
+      <summary>Ver texto detectado (OCR crudo)</summary>
+      <div class="raw-ocr">${rawText.replace(/</g,'&lt;')}</div>
+    </details>
+
+    <div style="margin-top:18px;">
+      <label class="field-label">Productos detectados (opcional, revisa y corrige)</label>
+      <table class="items-table">
+        <thead><tr><th class="col-desc">Producto</th><th class="col-num">Cant.</th><th class="col-unit">Unidad</th><th class="col-num">Precio</th><th class="col-cat">Categoría</th><th class="col-action"></th></tr></thead>
+        <tbody class="items-body"></tbody>
+      </table>
+      <button class="btn btn-ghost btn-sm add-item" style="margin-top:10px;">+ Agregar línea</button>
+    </div>
+
+    <div style="margin-top:20px; display:flex; gap:10px;">
+      <button class="btn btn-primary btn-guardar">Guardar este gasto</button>
+      <button class="btn btn-ghost btn-descartar">Descartar</button>
+    </div>
+  `;
+
+  llenarSelectCategorias(wrap.querySelector('.f-categoria'));
+  wrap.querySelector('.f-categoria').value = catSugerida;
+
+  const itemsBody = wrap.querySelector('.items-body');
+  function agregarFilaItem(item){
+    const tr = document.createElement('tr');
+    const key = (item.descripcion||'').trim().toLowerCase();
+    const sugerida = DICC[key];
+    const catItem = sugerida ? sugerida.categoria : catSugerida;
+    const unidadItem = item.unidad || (sugerida ? sugerida.unidad : '');
+
+    tr.innerHTML = `
+      <td><input type="text" class="it-desc" value="${(item.descripcion||'').replace(/"/g,'&quot;')}"></td>
+      <td><input type="text" class="it-cant" value="${item.cantidad||''}"></td>
+      <td>
+        <select class="it-unidad">
+          <option value="">—</option>
+          <option value="kg">kg</option>
+          <option value="g">g</option>
+          <option value="l">litro</option>
+          <option value="unidad">unidad</option>
+        </select>
+      </td>
+      <td><input type="number" step="0.01" class="it-precio" value="${item.precio||''}"></td>
+      <td><select class="it-categoria"></select></td>
+      <td class="col-action"><button class="rm-row">✕</button></td>
+    `;
+    llenarSelectCategorias(tr.querySelector('.it-categoria'));
+    tr.querySelector('.it-categoria').value = catItem;
+    tr.querySelector('.it-unidad').value = unidadItem;
+    tr.querySelector('.rm-row').addEventListener('click', ()=> tr.remove());
+    itemsBody.appendChild(tr);
+  }
+
+  parsed.items.forEach(agregarFilaItem);
+  wrap.querySelector('.add-item').addEventListener('click', ()=> agregarFilaItem({descripcion:'', cantidad:'', unidad:'', precio:''}));
+
+  wrap.querySelector('.btn-descartar').addEventListener('click', ()=> wrap.remove());
+
+  wrap.querySelector('.btn-guardar').addEventListener('click', ()=>{
+    const fecha = wrap.querySelector('.f-fecha').value;
+    const comercio = wrap.querySelector('.f-comercio').value.trim() || '(sin nombre)';
+    const total = parseFloat(wrap.querySelector('.f-total').value);
+    const categoriaGeneral = wrap.querySelector('.f-categoria').value;
+
+    if(!fecha || !total || total <= 0){
+      toast('Falta la fecha o el total');
+      return;
+    }
+
+    const items = [];
+    itemsBody.querySelectorAll('tr').forEach(tr=>{
+      const descripcion = tr.querySelector('.it-desc').value.trim();
+      if(!descripcion) return;
+      const cantidad = parseFloat(tr.querySelector('.it-cant').value) || null;
+      const unidad = tr.querySelector('.it-unidad').value;
+      const precio = parseFloat(tr.querySelector('.it-precio').value) || null;
+      const categoria = tr.querySelector('.it-categoria').value;
+      items.push({ descripcion, cantidad, unidad, precio, categoria });
+
+      // aprende del diccionario
+      DICC[descripcion.toLowerCase()] = { categoria, unidad };
+    });
+    guardarDiccionario(DICC);
+
+    GASTOS.push({
+      id: uid(), fecha, categoria: categoriaGeneral, comercio, monto: total,
+      fuente: 'boleta', notas: '', items
+    });
+    guardarGastos(GASTOS);
+
+    toast('Boleta guardada');
+    wrap.remove();
+  });
+
+  return wrap;
+}
+
+/* =========================================================
+   HISTORIAL
+   ========================================================= */
+function renderHistorial(){
+  const desde = document.getElementById('filtroDesde').value;
+  const hasta = document.getElementById('filtroHasta').value;
+  const cat = document.getElementById('filtroCategoria').value;
+  const texto = document.getElementById('filtroTexto').value.trim().toLowerCase();
+
+  let lista = [...GASTOS].sort((a,b)=> b.fecha.localeCompare(a.fecha));
+
+  lista = lista.filter(g=>{
+    if(desde && g.fecha < desde) return false;
+    if(hasta && g.fecha > hasta) return false;
+    if(cat && g.categoria !== cat) return false;
+    if(texto){
+      const enComercio = (g.comercio||'').toLowerCase().includes(texto);
+      const enItems = (g.items||[]).some(it=>(it.descripcion||'').toLowerCase().includes(texto));
+      if(!enComercio && !enItems) return false;
+    }
+    return true;
+  });
+
+  const body = document.getElementById('histBody');
+  body.innerHTML = '';
+
+  document.getElementById('histEmpty').style.display = lista.length ? 'none' : 'block';
+
+  lista.forEach(g=>{
+    const tr = document.createElement('tr');
+    const cantTexto = g.items && g.items.length === 1 && g.items[0].cantidad
+      ? `${g.items[0].cantidad} ${g.items[0].unidad||''}`
+      : (g.items && g.items.length > 1 ? `${g.items.length} ítems` : '—');
+    tr.innerHTML = `
+      <td>${g.fecha}</td>
+      <td><span class="badge">${g.categoria}</span></td>
+      <td>${g.comercio}</td>
+      <td>${cantTexto}</td>
+      <td class="amount">S/ ${g.monto.toFixed(2)}</td>
+      <td><button class="btn btn-ghost btn-sm rm-gasto" data-id="${g.id}">Borrar</button></td>
+    `;
+    body.appendChild(tr);
+  });
+
+  body.querySelectorAll('.rm-gasto').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      GASTOS = GASTOS.filter(g=>g.id !== btn.dataset.id);
+      guardarGastos(GASTOS);
+      renderHistorial();
+      toast('Gasto eliminado');
+    });
+  });
+}
+
+['filtroDesde','filtroHasta','filtroCategoria','filtroTexto'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', renderHistorial);
+});
+document.getElementById('btnLimpiarFiltros').addEventListener('click', ()=>{
+  document.getElementById('filtroDesde').value = '';
+  document.getElementById('filtroHasta').value = '';
+  document.getElementById('filtroCategoria').value = '';
+  document.getElementById('filtroTexto').value = '';
+  renderHistorial();
+});
+
+/* =========================================================
+   ESTADÍSTICAS
+   ========================================================= */
+let chartCategoria = null, chartMes = null, chartTop = null;
+
+function renderStats(){
+  const cards = document.getElementById('statCards');
+  cards.innerHTML = '';
+
+  if(!GASTOS.length){
+    cards.innerHTML = `<div class="empty-hint" style="grid-column:1/-1;"><b>Aún no hay datos para graficar</b>Registra al menos un gasto para ver tus estadísticas.</div>`;
+    if(chartCategoria) chartCategoria.destroy();
+    if(chartMes) chartMes.destroy();
+    if(chartTop) chartTop.destroy();
+    return;
+  }
+
+  const hoy = new Date();
+  const mesActual = hoy.toISOString().slice(0,7);
+  const totalMes = GASTOS.filter(g=>g.fecha.slice(0,7)===mesActual).reduce((s,g)=>s+g.monto,0);
+  const totalGeneral = GASTOS.reduce((s,g)=>s+g.monto,0);
+
+  const porMes = {};
+  GASTOS.forEach(g=>{ const m=g.fecha.slice(0,7); porMes[m]=(porMes[m]||0)+g.monto; });
+  const meses = Object.keys(porMes).sort();
+  const promedioMensual = meses.length ? totalGeneral/meses.length : 0;
+
+  const porCategoria = {};
+  GASTOS.forEach(g=>{ porCategoria[g.categoria]=(porCategoria[g.categoria]||0)+g.monto; });
+  const catTop = Object.entries(porCategoria).sort((a,b)=>b[1]-a[1])[0];
+
+  [
+    ['Gasto este mes', 'S/ ' + totalMes.toFixed(2)],
+    ['Promedio mensual', 'S/ ' + promedioMensual.toFixed(2)],
+    ['Categoría con más gasto', catTop ? catTop[0] : '—'],
+    ['Total registrado', 'S/ ' + totalGeneral.toFixed(2)],
+  ].forEach(([label,value])=>{
+    const div = document.createElement('div');
+    div.className = 'stat-card';
+    div.innerHTML = `<div class="label">${label}</div><div class="value">${value}</div>`;
+    cards.appendChild(div);
+  });
+
+  // Gráfico: por categoría (dona)
+  const coloresCat = ['#0B4F45','#B8873A','#A23B2E','#4B5A55','#7A9E93','#D9BF87','#3D6B60','#C79B5E'];
+  if(chartCategoria) chartCategoria.destroy();
+  chartCategoria = new Chart(document.getElementById('chartCategoria'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(porCategoria),
+      datasets: [{ data: Object.values(porCategoria), backgroundColor: coloresCat }]
+    },
+    options: { plugins:{ legend:{ position:'bottom', labels:{ font:{ family:"'Inter'", size:11 } } } } }
+  });
+
+  // Gráfico: por mes (barras)
+  if(chartMes) chartMes.destroy();
+  chartMes = new Chart(document.getElementById('chartMes'), {
+    type: 'bar',
+    data: {
+      labels: meses,
+      datasets: [{ label:'Gasto mensual (S/)', data: meses.map(m=>porMes[m]), backgroundColor:'#0B4F45' }]
+    },
+    options: { plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } }
+  });
+
+  // Gráfico: top productos/comercios
+  const porProducto = {};
+  GASTOS.forEach(g=>{
+    if(g.items && g.items.length){
+      g.items.forEach(it=>{
+        if(!it.precio) return;
+        porProducto[it.descripcion] = (porProducto[it.descripcion]||0) + it.precio;
+      });
+    } else {
+      porProducto[g.comercio] = (porProducto[g.comercio]||0) + g.monto;
+    }
+  });
+  const topProductos = Object.entries(porProducto).sort((a,b)=>b[1]-a[1]).slice(0,10);
+
+  if(chartTop) chartTop.destroy();
+  chartTop = new Chart(document.getElementById('chartTop'), {
+    type: 'bar',
+    data: {
+      labels: topProductos.map(p=>p[0]),
+      datasets: [{ label:'Gasto acumulado (S/)', data: topProductos.map(p=>p[1]), backgroundColor:'#B8873A' }]
+    },
+    options: { indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true } } }
+  });
+}
+
+/* =========================================================
+   RESPALDO: EXPORTAR / IMPORTAR / BORRAR
+   ========================================================= */
+document.getElementById('btnExportar').addEventListener('click', ()=>{
+  const data = { gastos: GASTOS, diccionario: DICC, exportado: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `respaldo-gastos-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  toast('Respaldo descargado');
+});
+
+document.getElementById('btnImportarBtn').addEventListener('click', ()=> document.getElementById('btnImportar').click());
+document.getElementById('btnImportar').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const data = JSON.parse(reader.result);
+      if(data.gastos){
+        GASTOS = data.gastos;
+        guardarGastos(GASTOS);
+      }
+      if(data.diccionario){
+        DICC = data.diccionario;
+        guardarDiccionario(DICC);
+      }
+      toast('Respaldo importado');
+      renderHistorial();
+      renderStats();
+    }catch(err){
+      toast('El archivo no es un respaldo válido');
+    }
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById('btnBorrarTodo').addEventListener('click', ()=>{
+  if(!confirm('¿Seguro que quieres borrar TODOS los gastos y el diccionario de productos? Esto no se puede deshacer.')) return;
+  GASTOS = [];
+  DICC = {};
+  guardarGastos(GASTOS);
+  guardarDiccionario(DICC);
+  toast('Todos los datos fueron borrados');
+  renderHistorial();
+  renderStats();
+});
+
+/* Carga inicial */
+renderHistorial();
+</script>
+</body>
+</html>
